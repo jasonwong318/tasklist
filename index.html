@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Task List">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07090f">
+<meta name="application-name" content="Task List">
+<meta name="format-detection" content="telephone=no">
+<!-- Apple Touch Icon (SVG encoded as data URI) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23070910'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233b82f6'/%3E%3Cstop offset='1' stop-color='%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='48' y='32' width='84' height='116' rx='12' fill='url(%23g)'/%3E%3Crect x='66' y='24' width='48' height='18' rx='9' fill='%231e293b'/%3E%3Crect x='62' y='68' width='56' height='8' rx='4' fill='white' opacity='.9'/%3E%3Crect x='62' y='86' width='40' height='8' rx='4' fill='white' opacity='.6'/%3E%3Crect x='62' y='104' width='48' height='8' rx='4' fill='white' opacity='.6'/%3E%3Ccircle cx='54' cy='72' r='5' fill='white' opacity='.9'/%3E%3Ccircle cx='54' cy='90' r='5' fill='%2322c55e'/%3E%3Ccircle cx='54' cy='108' r='5' fill='white' opacity='.6'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070910'/%3E%3Crect x='8' y='5' width='16' height='22' rx='3' fill='%233b82f6'/%3E%3Crect x='12' y='3' width='8' height='4' rx='2' fill='%231e293b'/%3E%3Crect x='11' y='12' width='10' height='2' rx='1' fill='white'/%3E%3Crect x='11' y='16' width='7' height='2' rx='1' fill='white' opacity='.7'/%3E%3Crect x='11' y='20' width='9' height='2' rx='1' fill='white' opacity='.7'/%3E%3C/svg%3E">
+<title>Task List · 任務追蹤系統</title>
+<style>
+/* ── Dark theme (default) ── */
+:root{
+  --bg:#07090f;--card:#0e1520;--card2:#141e2e;--border:#1c2d42;
+  --text:#dde6f0;--muted:#445b75;
+  --blue:#3b82f6;--green:#22c55e;--red:#ef4444;--orange:#f97316;
+  --purple:#a855f7;--teal:#14b8a6;--yellow:#eab308;
+  --nav-h:64px;
+  --input-bg:#050810;
+  --shadow:0 2px 8px rgba(0,0,0,.35);
+}
+/* ── Light theme ── */
+body.light{
+  --bg:#f0f4f8;--card:#ffffff;--card2:#f8fafc;--border:#d1dce8;
+  --text:#1e2d3d;--muted:#7a94ae;
+  --input-bg:#f8fafc;
+  --shadow:0 2px 8px rgba(0,0,0,.1);
+}
+body.light select option{background:#fff;color:#1e2d3d}
+body.light ::-webkit-scrollbar-thumb{background:#c8d8e8}
+/* Light mode overrides for hardcoded dark backgrounds */
+body.light .stat-box{background:#eef2f7 !important}
+body.light .card2{background:#f1f5fb !important}
+body.light #appHeader{background:linear-gradient(180deg,#e8eef6 0%,#ffffff 100%) !important}
+body.light #desktopNav{background:#ffffff !important}
+body.light #mobileNav{background:rgba(255,255,255,.97) !important;border-top-color:#d1dce8 !important}
+body.light .nav-btn{color:#7a94ae}
+body.light .nav-btn.active{color:var(--blue)}
+body.light .overlay{background:rgba(220,228,240,.92) !important}
+body.light .modal{background:#fff !important}
+body.light .id-card{background:#fff !important}
+body.light .id-member-btn{background:#f1f5fb !important;border-color:#d1dce8 !important;color:#1e2d3d !important}
+body.light .id-member-btn:hover{background:#e8eef6 !important;border-color:var(--blue) !important}
+body.light .task-card{background:#fff !important}
+body.light .task-card.overdue{background:#fff5f5 !important;border-color:#ef444430 !important}
+body.light .comment-item{background:#f1f5fb !important}
+body.light .gitee-banner{background:linear-gradient(135deg,#eef5ff,#e8f0fa) !important;border-color:#bcd3f0 !important}
+body.light #alertBanner{background:linear-gradient(135deg,#fff5f5,#fff8f0) !important}
+body.light .view-toggle{background:#eef2f7 !important}
+body.light .view-btn.active{background:var(--blue) !important;color:#fff !important}
+body.light .view-btn{color:#7a94ae !important}
+body.light .cal-wrap{background:#fff !important}
+body.light .cal-day:hover{background:#eef2f7 !important}
+body.light .cal-day.selected{background:#dbeafe !important;border-color:#93c5fd !important}
+body.light .cal-day-detail{background:#f8fafc !important}
+body.light .dtab{color:#7a94ae !important}
+body.light .dtab.active{background:var(--blue) !important;color:#fff !important}
+body.light mark{background:#fde68a80 !important;color:#92400e !important}
+body.light .progress-bar-outer{background:#e2e8f0 !important}
+body,body *{transition:background-color .2s,border-color .2s,color .15s}
+body button,body a{transition:opacity .15s,transform .12s,background-color .2s,border-color .15s,color .15s}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh;overscroll-behavior:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+input,select,textarea{background:var(--input-bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:inherit;transition:border-color .2s;-webkit-appearance:none;min-height:44px}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #3b82f618}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23445b75' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+select option{background:#0e1520}
+
+button{cursor:pointer;font-family:inherit;border:none;-webkit-tap-highlight-color:transparent;transition:opacity .15s,transform .12s}
+button:active{transform:scale(0.96)}
+.btn{border-radius:11px;padding:12px 18px;font-size:14px;font-weight:700;letter-spacing:.02em;min-height:44px}
+.btn-primary{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff}
+.btn-success{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:9px;min-height:38px}
+.btn-full{width:100%;display:block;text-align:center}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:16px}
+.card2{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.chip{display:inline-block;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;white-space:nowrap;min-height:36px}
+.chip.active{border-color:var(--blue);background:#3b82f620;color:var(--blue)}
+.label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:block}
+.field{margin-bottom:13px}
+
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stat-box{background:var(--input-bg);border:1px solid var(--border);border-radius:11px;padding:10px 4px;text-align:center}
+.stat-num{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
+
+.pbar-wrap{margin-bottom:6px}
+.pbar-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.pbar-track{height:5px;background:var(--border);border-radius:4px;overflow:hidden}
+.pbar-fill{height:5px;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+.task-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700}
+.today-section{margin-bottom:16px}
+.today-section-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.comment-item{padding:10px 12px;background:var(--input-bg);border-radius:9px;margin-bottom:7px;border:1px solid var(--border)}
+.comment-meta{font-size:11px;color:var(--muted);margin-bottom:4px}
+.comment-text{font-size:13px;line-height:1.5}
+.progress-bar-outer{height:6px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-bar-inner{height:6px;border-radius:4px;transition:width .4s}
+.task-card.done{opacity:.5}
+.task-card.overdue{background:#1a0d0d!important;border-color:#ef444435!important}
+.task-card.urgent-card{border-color:#f9731630!important}
+
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;transition:background .3s}
+.gitee-banner{background:linear-gradient(135deg,#1c3358,#0f1f35);border:1px solid #3b82f640;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.wxp-step{display:flex;gap:12px;margin-bottom:11px;align-items:flex-start}
+.wxp-num{width:27px;height:27px;border-radius:50%;background:#3b82f620;color:var(--blue);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+
+/* Toast */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:24px;font-size:13px;font-weight:700;z-index:9999;display:none;white-space:nowrap;box-shadow:0 10px 28px rgba(0,0,0,.55);animation:toastIn .25s ease;max-width:calc(100vw - 40px)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Overlays */
+.overlay{position:fixed;inset:0;background:rgba(7,9,15,.92);z-index:9990;display:none;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;width:100%;max-width:380px;max-height:92vh;overflow-y:auto}
+
+/* Alert banner */
+#alertBanner{display:none;margin:0 14px 0;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#1a0d0d,#1a1000);border:1px solid #ef444430;font-size:12px;line-height:1.7}
+#alertBanner.has-warn{border-color:#f9731640;background:linear-gradient(135deg,#1a0d00,#120d00)}
+
+/* Identity selector */
+#identityOverlay{position:fixed;inset:0;background:rgba(7,9,15,.97);z-index:9995;display:flex;align-items:center;justify-content:center;padding:20px}
+.id-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:360px}
+.id-member-btn{width:100%;padding:14px 16px;border-radius:12px;background:var(--card2);border:1.5px solid var(--border);color:var(--text);text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:9px;font-size:14px;font-weight:600;transition:all .2s}
+.id-member-btn:hover,.id-member-btn:active{border-color:var(--blue);background:#3b82f615}
+
+/* Calendar */
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-nav{background:transparent;border:none;color:var(--blue);font-size:20px;padding:4px 10px;border-radius:8px;min-height:36px;font-weight:700}
+.cal-month{font-weight:800;font-size:16px;letter-spacing:-.01em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{text-align:center;font-size:11px;color:var(--muted);font-weight:700;padding:4px 0;letter-spacing:.04em}
+.cal-day{min-height:46px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 2px 4px;cursor:pointer;transition:background .15s;position:relative}
+.cal-day:hover{background:var(--card2)}
+.cal-day.today .cal-day-num{background:var(--blue);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.cal-day.selected{background:#3b82f615;border:1px solid #3b82f640}
+.cal-day.other-month .cal-day-num{color:var(--muted)}
+.cal-day-num{font-size:14px;font-weight:600;line-height:1;margin-bottom:4px}
+.cal-dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;min-height:8px}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cal-day-detail{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:12px}
+.cal-day-detail-title{font-weight:700;color:var(--blue);margin-bottom:10px;font-size:13px}
+
+/* Mobile layout */
+#appHeader{background:linear-gradient(180deg,#0a1120 0%,var(--card) 100%);padding:14px 14px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+#mainScroll{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.section{display:none;padding:14px}
+.section.active{display:block}
+#mobileNav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:rgba(14,21,32,.97);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom);z-index:200;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 2px;border-radius:12px;background:transparent;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.02em;min-height:52px;transition:all .2s}
+.nav-icon{font-size:22px;line-height:1;transition:transform .2s}
+.nav-btn.active{color:var(--blue)}
+.nav-btn.active .nav-icon{transform:scale(1.15)}
+
+/* View toggle (list / calendar) */
+.view-toggle{display:flex;gap:4px;padding:4px;background:var(--card2);border-radius:12px;margin-bottom:12px;width:fit-content}
+.view-btn{padding:6px 16px;border-radius:9px;background:transparent;border:none;color:var(--muted);font-size:12px;font-weight:700;transition:all .2s;min-height:34px}
+.view-btn.active{background:var(--blue);color:#fff}
+
+#desktopNav{display:none}
+#colSide{display:none}
+
+/* ── Desktop ── */
+@media(min-width:768px){
+  body{background:#050810}
+  #mobileNav{display:none!important}
+  #mainScroll{height:auto;overflow:visible}
+  #desktopWrapper{max-width:1120px;margin:0 auto;min-height:100vh}
+  #appHeader{padding:18px 28px 16px}
+  #desktopNav{display:flex;gap:4px;padding:10px 28px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:99}
+  .dtab{padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:700;background:transparent;color:var(--muted);letter-spacing:.02em;transition:all .2s;white-space:nowrap;min-height:38px}
+  .dtab.active{background:var(--blue);color:#fff}
+  #twoCol{display:grid;grid-template-columns:1fr 350px;gap:20px;padding:20px 28px 32px;align-items:start}
+  #colMain .section{display:none;padding:0}
+  #colMain .section.active{display:block}
+  #colSide{display:flex;flex-direction:column;gap:16px}
+  #alertBanner{margin:0 28px 0}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ══ IDENTITY SELECTOR OVERLAY ══ -->
+<div id="identityOverlay">
+  <div class="id-card">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:10px">📋</div>
+      <div style="font-weight:800;font-size:20px;letter-spacing:-.02em">Task List</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">任務追蹤系統</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:14px">請選擇你是誰</div>
+    </div>
+    <div id="idMemberList"></div>
+    <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:14px">
+      <button onclick="selectIdentity('manager','__manager__')"
+        style="width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,#3b82f620,#6366f120);border:1.5px solid #3b82f650;color:var(--blue);font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">👔</span>
+        <div style="text-align:left"><div>管理者登入</div><div style="font-size:11px;font-weight:500;color:var(--muted)">可查看及管理全團隊任務</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+<div class="overlay" id="deleteModal" onclick="closeDeleteModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="font-weight:800;font-size:16px;margin-bottom:9px">確認刪除任務</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:20px">此操作無法復原，確定要刪除嗎？</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost btn-full" onclick="closeDeleteModal()">取消</button>
+      <button class="btn btn-danger btn-full" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Conflict Modal -->
+<div class="overlay" id="conflictModal">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <div style="font-size:28px;text-align:center;margin-bottom:10px">⚠️</div>
+    <div style="font-weight:800;font-size:16px;margin-bottom:9px;text-align:center;color:var(--orange)">偵測到版本衝突</div>
+    <div id="conflictInfo" style="color:var(--muted);font-size:13px;margin-bottom:16px;text-align:center;line-height:1.6"></div>
+    <div style="background:#0a1020;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.75">
+      <div style="color:var(--text);font-weight:700;margin-bottom:6px">請選擇處理方式：</div>
+      <div>🔀 <strong style="color:var(--teal)">智能合併</strong>：保留你的新增任務，其他以遠端為準（推薦）</div>
+      <div>☁️ <strong style="color:var(--blue)">載入遠端</strong>：放棄本地未同步的修改，載入最新遠端資料</div>
+      <div>💾 <strong style="color:var(--orange)">強制覆蓋</strong>：以本地資料強制覆蓋遠端（可能丟失他人更新）</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-full" style="background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff" onclick="conflictMerge()">🔀 智能合併（推薦）</button>
+      <button class="btn btn-full" style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff" onclick="conflictLoadRemote()">☁️ 載入遠端資料</button>
+      <button class="btn btn-ghost btn-full" style="color:var(--orange);border-color:#f9731640" onclick="conflictOverwrite()">💾 強制覆蓋遠端</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Edit Modal -->
+<div class="overlay" id="editTaskModal" onclick="closeEditTaskModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
+    <div style="font-weight:800;font-size:16px;margin-bottom:18px;color:var(--blue)">✏️ 修改任務</div>
+    <div class="field"><span class="label">任務標題 *</span><input id="eTTitle" placeholder="任務標題"></div>
+    <div class="field"><span class="label">描述（選填）</span><textarea id="eTDesc" rows="2" style="min-height:auto;padding:9px 12px;resize:none" placeholder="補充說明..."></textarea></div>
+    <div class="field">
+      <span class="label">負責人 * <span style="font-weight:500;font-size:10px;color:var(--muted)">(可多選)</span></span>
+      <div id="eTAssigneeList" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px;background:#050810;border:1px solid var(--border);border-radius:9px"></div>
+    </div>
+    <div class="field"><span class="label">任務類型</span>
+      <select id="eTType" onchange="toggleEditFields()">
+        <option value="deadline">📅 有期限任務</option>
+        <option value="recurring">🔄 例行任務</option>
+      </select></div>
+    <div class="field" id="eTDeadlineField"><span class="label">截止日期</span><input id="eTDeadline" type="date" style="cursor:pointer"></div>
+    <div id="eTRecurField" style="display:none">
+      <div class="field"><span class="label">重複頻率</span>
+        <select id="eTRecur" onchange="toggleEditRecurDay()">
+          <option value="weekly">每週</option><option value="biweekly">每兩週</option>
+          <option value="monthly">每月</option><option value="bimonthly">每兩個月</option>
+          <option value="quarterly">每季度</option><option value="yearly">每年度</option>
+        </select></div>
+      <div class="field" id="eTRecurDayWeekField" style="display:none"><span class="label">重複日（星期）</span>
+        <select id="eTRecurDayWeek">
+          <option value="1">星期一</option><option value="2">星期二</option><option value="3">星期三</option>
+          <option value="4">星期四</option><option value="5">星期五</option><option value="6">星期六</option><option value="0">星期日</option>
+        </select></div>
+      <div class="field" id="eTRecurDayMonthField" style="display:none"><span class="label">每月幾號</span>
+        <select id="eTRecurDayMonth">${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1} 號</option>`).join('')}</select></div>
+      <div class="field"><span class="label">開始日期（選填）</span><input id="eTRecurStart" type="date" style="cursor:pointer"></div>
+    </div>
+    <div class="field"><span class="label">優先級</span>
+      <select id="eTPriority"><option value="normal">一般</option><option value="urgent">🚨 緊急</option></select></div>
+    <div class="field">
+      <span class="label">標籤（空格分隔）</span>
+      <input id="eTTags" placeholder="例如：財務 合規 Q1">
+      <div id="eTTagsPreview" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost btn-full" onclick="closeEditTaskModal()">取消</button>
+      <button class="btn btn-primary btn-full" onclick="saveTaskEdit()">儲存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- Comment / Progress Modal -->
+<div class="overlay" id="commentModal" onclick="closeCommentModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
+    <div style="font-weight:800;font-size:16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+      <span>💬 進度備注</span>
+      <button onclick="closeCommentModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px">×</button>
+    </div>
+    <div id="commentTaskTitle" style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.4"></div>
+    <!-- Progress slider -->
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span class="label" style="margin:0">完成進度</span>
+        <span id="progressDisplay" style="font-weight:800;color:var(--blue);font-size:14px">0%</span>
+      </div>
+      <input id="progressSlider" type="range" min="0" max="100" step="5" value="0"
+        style="width:100%;height:6px;padding:0;min-height:auto;border:none;border-radius:4px;background:var(--border);accent-color:var(--blue);cursor:pointer"
+        oninput="document.getElementById('progressDisplay').textContent=this.value+'%'">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+        <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+      </div>
+    </div>
+    <!-- Quick status buttons -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="chip" onclick="setQuickStatus('等待批核')">⏳ 等待批核</button>
+      <button class="chip" onclick="setQuickStatus('進行中')">🔄 進行中</button>
+      <button class="chip" onclick="setQuickStatus('已完成50%')">📊 已完成50%</button>
+      <button class="chip" onclick="setQuickStatus('需要協助')">🆘 需要協助</button>
+      <button class="chip" onclick="setQuickStatus('已阻塞')">🚫 已阻塞</button>
+    </div>
+    <div class="field">
+      <span class="label">留言內容</span>
+      <textarea id="commentText" rows="3" style="resize:none" placeholder="輸入進度更新或備注..."></textarea>
+    </div>
+    <!-- Existing comments -->
+    <div id="existingComments" style="max-height:200px;overflow-y:auto;margin-bottom:12px"></div>
+    <div style="display:flex;gap:9px">
+      <button class="btn btn-ghost btn-full" onclick="closeCommentModal()">關閉</button>
+      <button class="btn btn-primary btn-full" onclick="saveComment()">提交備注</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="memberModal" onclick="closeMemberModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="font-weight:800;font-size:16px;margin-bottom:18px">✏️ 編輯成員資料</div>
+    <div class="field"><span class="label">姓名</span><input id="editName" type="text" placeholder="姓名"></div>
+    <div class="field"><span class="label">WxPusher UID</span><input id="editWxpUid" placeholder="掃碼訂閱後取得 UID"></div>
+    <div class="field"><span class="label">微信 ID（選填）</span><input id="editWechatId" placeholder="用於@提醒"></div>
+    <div class="field"><span class="label">所在地區（選填）</span><input id="editDept" placeholder="例如：香港 / 深圳 / 廣州"></div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost btn-full" onclick="closeMemberModal()">取消</button>
+      <button class="btn btn-primary btn-full" onclick="saveMemberEdit()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LAYOUT ══ -->
+<div id="desktopWrapper">
+
+<!-- HEADER -->
+<div id="appHeader">
+  <!-- Top row -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+    <div style="width:44px;height:44px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 18px #3b82f640;flex-shrink:0">📋</div>
+    <div style="flex:1">
+      <div style="font-weight:800;font-size:17px;letter-spacing:-.02em">Task List</div>
+      <div style="font-size:10px;color:var(--muted)">任務追蹤系統</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+      <!-- Feature 5: theme toggle -->
+      <button onclick="toggleTheme()" id="themeBtn" title="切換主題"
+        style="background:transparent;border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:16px;color:var(--muted)">🌙</button>
+      <div style="font-size:11px;color:var(--muted);display:flex;align-items:center">
+        <span class="sync-dot" id="syncDot" style="background:var(--muted)"></span>
+        <span id="syncLabel">未連線</span>
+      </div>
+      <button onclick="showIdentityOverlay()" id="identityBtn"
+        style="background:#3b82f620;color:var(--blue);border:1px solid #3b82f650;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">
+        <span id="identityAvatar" style="font-size:16px">👤</span>
+        <span id="identityName">選擇身份</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Team overview (manager only) -->
+  <div id="teamOverviewSection" style="display:none;margin-bottom:10px">
+    <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">🌐 團隊概覽</div>
+    <div class="stat-grid" style="margin-bottom:8px">
+      <div class="stat-box"><div class="stat-num" style="color:var(--blue)"  id="tStatPending">0</div><div class="stat-lbl">待完成</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--green)" id="tStatDone">0</div><div class="stat-lbl">已完成</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--red)"   id="tStatUrgent">0</div><div class="stat-lbl">緊急</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--orange)"id="tStatOverdue">0</div><div class="stat-lbl">逾期</div></div>
+    </div>
+    <div class="card2" style="padding:11px 12px">
+      <div class="pbar-wrap">
+        <div class="pbar-head"><span style="color:var(--muted);font-size:11px">📅 有期限</span><span id="tpDeadline" style="color:var(--blue);font-weight:700;font-size:11px">0/0</span></div>
+        <div class="pbar-track"><div class="pbar-fill" id="tpDeadlineFill" style="background:linear-gradient(90deg,#3b82f6,#6366f1);width:0%"></div></div>
+      </div>
+      <div class="pbar-wrap" style="margin-bottom:0">
+        <div class="pbar-head"><span style="color:var(--muted);font-size:11px">🔄 例行</span><span id="tpRecurring" style="color:var(--green);font-weight:700;font-size:11px">0/0</span></div>
+        <div class="pbar-track"><div class="pbar-fill" id="tpRecurringFill" style="background:linear-gradient(90deg,#22c55e,#16a34a);width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal overview -->
+  <div id="personalOverviewSection" style="display:none">
+    <div id="personalLabel" style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">👤 我的任務</div>
+    <div class="stat-grid" style="margin-bottom:8px">
+      <div class="stat-box"><div class="stat-num" style="color:var(--blue)"  id="mStatPending">0</div><div class="stat-lbl">待完成</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--green)" id="mStatDone">0</div><div class="stat-lbl">已完成</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--red)"   id="mStatUrgent">0</div><div class="stat-lbl">緊急</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--orange)"id="mStatOverdue">0</div><div class="stat-lbl">逾期</div></div>
+    </div>
+    <div class="card2" style="padding:11px 12px">
+      <div class="pbar-wrap">
+        <div class="pbar-head"><span style="color:var(--muted);font-size:11px">📅 有期限</span><span id="mpDeadline" style="color:var(--blue);font-weight:700;font-size:11px">0/0</span></div>
+        <div class="pbar-track"><div class="pbar-fill" id="mpDeadlineFill" style="background:linear-gradient(90deg,#3b82f6,#6366f1);width:0%"></div></div>
+      </div>
+      <div class="pbar-wrap" style="margin-bottom:0">
+        <div class="pbar-head"><span style="color:var(--muted);font-size:11px">🔄 例行</span><span id="mpRecurring" style="color:var(--green);font-weight:700;font-size:11px">0/0</span></div>
+        <div class="pbar-track"><div class="pbar-fill" id="mpRecurringFill" style="background:linear-gradient(90deg,#22c55e,#16a34a);width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /appHeader -->
+
+<!-- ALERT BANNER -->
+<div id="alertBanner"></div>
+
+<!-- DESKTOP TOP NAV -->
+<div id="desktopNav">
+  <button class="dtab" onclick="switchTab('today',this)">☀️ 今日</button>
+  <button class="dtab active" onclick="switchTab('tasks',this)">📋 任務</button>
+  <button class="dtab" onclick="switchTab('members',this)">👥 成員</button>
+  <button class="dtab" id="dReminderTab" onclick="switchTab('reminders',this)">🔔 提醒</button>
+  <button class="dtab" onclick="switchTab('settings',this)">⚙️ 設定</button>
+</div>
+
+<!-- TWO-COL -->
+<div id="twoCol">
+  <div id="colMain">
+    <div id="mainScroll">
+
+      <!-- ─ TODAY ─ -->
+      <div id="sec-today" class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-weight:800;font-size:18px" id="todayDateLabel"></div>
+            <div style="font-size:12px;color:var(--muted)" id="todayGreeting"></div>
+          </div>
+          <button onclick="sendTodayReminder()" class="btn btn-sm btn-primary">📤 發今日提醒</button>
+        </div>
+        <div id="todayContent"></div>
+      </div>
+
+      <!-- ─ TASKS ─ -->
+      <div id="sec-tasks" class="section active">
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button class="view-btn active" id="vListBtn" onclick="setTaskView('list',this)">☰ 列表</button>
+          <button class="view-btn" id="vCalBtn" onclick="setTaskView('cal',this)">📅 行事曆</button>
+        </div>
+
+        <!-- Search bar -->
+        <div id="taskListView">
+          <div style="position:relative;margin-bottom:11px">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;pointer-events:none">🔍</span>
+            <input id="taskSearch" type="search" placeholder="搜尋任務標題或描述..."
+              style="padding-left:38px;padding-right:36px;background:#050810;border:1px solid var(--border);border-radius:10px;height:44px"
+              oninput="renderTasks()">
+            <button id="searchClearBtn" onclick="clearSearch()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--muted);font-size:18px;padding:2px 4px;line-height:1">×</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px" id="statusFilters">
+            <button class="chip active" onclick="setFilter('status','all',this)">全部</button>
+            <button class="chip" onclick="setFilter('status','pending',this)">待辦</button>
+            <button class="chip" onclick="setFilter('status','urgent',this)">🚨 緊急</button>
+            <button class="chip" onclick="setFilter('status','overdue',this)">⚠️ 逾期</button>
+            <button class="chip" onclick="setFilter('status','completed',this)">已完成</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px" id="typeFilters">
+            <button class="chip active" onclick="setFilter('type','all',this)">全類型</button>
+            <button class="chip" onclick="setFilter('type','deadline',this)">📅 有期限</button>
+            <button class="chip" onclick="setFilter('type','recurring',this)">🔄 例行</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px" id="memberFilters"></div>
+
+          <div id="managerAddBtn" style="margin-bottom:13px">
+            <button class="btn btn-primary btn-full" onclick="toggleAddTask()">＋ 新增任務</button>
+          </div>
+          <div id="addTaskForm" style="display:none;margin-bottom:14px">
+            <div class="card2" style="border-color:#3b82f640">
+              <div style="font-weight:800;font-size:13px;color:var(--blue);margin-bottom:14px">新增任務</div>
+              <div class="field"><span class="label">任務標題 *</span><input id="fTitle" placeholder="輸入任務標題..."></div>
+              <div class="field"><span class="label">描述（選填）</span><textarea id="fDesc" rows="2" style="min-height:auto;padding:9px 12px;resize:none" placeholder="補充說明、注意事項..."></textarea></div>
+              <div class="field">
+                <span class="label">負責人 * <span style="font-weight:500;font-size:10px;color:var(--muted)">(可多選)</span></span>
+                <div id="fAssigneeList" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px;background:#050810;border:1px solid var(--border);border-radius:9px"></div>
+              </div>
+              <div class="field"><span class="label">任務類型</span>
+                <select id="fType" onchange="toggleDeadlineField()">
+                  <option value="deadline">📅 有期限任務</option>
+                  <option value="recurring">🔄 例行任務</option>
+                </select></div>
+              <div class="field" id="deadlineField">
+                <span class="label">截止日期</span>
+                <input id="fDeadline" type="date" style="cursor:pointer">
+              </div>
+              <div id="recurField" style="display:none">
+                <div class="field"><span class="label">重複頻率</span>
+                  <select id="fRecur" onchange="toggleRecurDay()">
+                    <option value="weekly">每週</option>
+                    <option value="biweekly">每兩週</option>
+                    <option value="monthly">每月</option>
+                    <option value="bimonthly">每兩個月</option>
+                    <option value="quarterly">每季度</option>
+                    <option value="yearly">每年度</option>
+                  </select></div>
+                <div class="field" id="recurDayWeekField" style="display:none">
+                  <span class="label">重複日（星期）</span>
+                  <select id="fRecurDayWeek">
+                    <option value="1">星期一</option><option value="2">星期二</option>
+                    <option value="3">星期三</option><option value="4">星期四</option>
+                    <option value="5">星期五</option><option value="6">星期六</option>
+                    <option value="0">星期日</option>
+                  </select></div>
+                <div class="field" id="recurDayMonthField" style="display:none">
+                  <span class="label">重複日（每月幾號）</span>
+                  <select id="fRecurDayMonth">
+                    ${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1} 號</option>`).join('')}
+                  </select></div>
+                <div class="field"><span class="label">開始日期（選填）</span>
+                  <input id="fRecurStart" type="date" style="cursor:pointer">
+                </div>
+              </div>
+              <div class="field"><span class="label">優先級</span>
+                <select id="fPriority"><option value="normal">一般</option><option value="urgent">🚨 緊急</option></select></div>
+              <div class="field">
+                <span class="label">標籤（選填，空格分隔）</span>
+                <input id="fTags" placeholder="例如：財務 合規 Q1 重要">
+                <div id="fTagsPreview" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"></div>
+              </div>
+              <button class="btn btn-success btn-full" onclick="addTask()">確認新增</button>
+            </div>
+          </div>
+          <div id="taskList"></div>
+          <div id="taskCount" style="text-align:center;color:var(--muted);font-size:11px;margin-top:10px;font-weight:600"></div>
+        </div>
+
+        <!-- Calendar view -->
+        <div id="taskCalView" style="display:none">
+          <div class="cal-wrap">
+            <div class="cal-header">
+              <button class="cal-nav" onclick="calPrev()">‹</button>
+              <div class="cal-month" id="calMonthLabel"></div>
+              <button class="cal-nav" onclick="calNext()">›</button>
+            </div>
+            <div class="cal-grid" id="calDowRow">
+              <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
+              <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div><div class="cal-dow">六</div>
+            </div>
+            <div class="cal-grid" id="calDays"></div>
+          </div>
+          <div id="calDayDetail" style="display:none"></div>
+          <div id="calLegend" style="display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted);margin-bottom:12px;padding:0 4px;flex-wrap:wrap">
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:4px"></span>緊急</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:4px"></span>一般期限</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:4px"></span>例行</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:4px"></span>逾期</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px"></span>已完成</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─ MEMBERS ─ -->
+      <div id="sec-members" class="section">
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button class="view-btn active" id="mListBtn" onclick="setMembersView('list',this)">☰ 列表</button>
+          <button class="view-btn" id="mCalBtn" onclick="setMembersView('cal',this)">📅 行事曆</button>
+        </div>
+
+        <div id="membersListView">
+          <div id="memberList"></div>
+          <div id="addMemberSection" class="card" style="margin-top:4px">
+            <div style="font-weight:700;margin-bottom:13px;color:var(--green)">➕ 新增成員</div>
+            <div class="field"><span class="label">姓名 *</span><input id="newName" placeholder="姓名"></div>
+            <div class="field"><span class="label">WxPusher UID</span><input id="newWxpUid" placeholder="成員掃碼後取得 UID"></div>
+            <div class="field"><span class="label">微信 ID（選填）</span><input id="newWechatId" placeholder="用於@提醒"></div>
+            <div class="field"><span class="label">所在地區（選填）</span><input id="newDept" placeholder="例如：香港 / 深圳 / 廣州"></div>
+            <button class="btn btn-success btn-full" onclick="addMember()">確認新增</button>
+          </div>
+        </div>
+
+        <div id="membersCalView" style="display:none">
+          <div class="cal-wrap">
+            <div class="cal-header">
+              <button class="cal-nav" onclick="mCalPrev()">‹</button>
+              <div class="cal-month" id="mCalMonthLabel"></div>
+              <button class="cal-nav" onclick="mCalNext()">›</button>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
+              <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div><div class="cal-dow">六</div>
+            </div>
+            <div class="cal-grid" id="mCalDays"></div>
+          </div>
+          <div id="mCalDayDetail" style="display:none"></div>
+          <div style="display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted);margin-bottom:12px;padding:0 4px;flex-wrap:wrap">
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:4px"></span>緊急</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:4px"></span>一般期限</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:4px"></span>例行</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:4px"></span>逾期</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px"></span>已完成</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─ AI SCAN (hidden) ─ -->
+      <div id="sec-ai" class="section" style="display:none!important">
+        <!-- Hidden inputs kept for JS compatibility -->
+        <input id="aiApiKey" type="hidden">
+        <textarea id="meetingText" style="display:none"></textarea>
+        <div id="scannedList" style="display:none"><div id="scannedItems"></div><span id="scannedCount"></span></div>
+      </div>
+
+      <!-- ─ REMINDERS ─ -->
+      <div id="sec-reminders" class="section">
+        <div class="card" style="margin-bottom:12px">
+          <div style="font-weight:800;font-size:15px;color:var(--blue);margin-bottom:15px">🔔 發送任務提醒</div>
+          <div class="field"><span class="label">提醒對象</span>
+            <select id="reminderTarget" onchange="updateReminderPreview()"><option value="all">全部成員</option></select></div>
+          <div class="field"><span class="label">附加備注（選填）</span>
+            <input id="reminderNote" placeholder="例如：請於明日開會前提交進度..." oninput="updateReminderPreview()"></div>
+          <div class="card2" style="margin-bottom:14px">
+            <span class="label" style="margin-bottom:8px">訊息預覽</span>
+            <pre id="reminderPreview" style="font-size:12px;white-space:pre-wrap;line-height:1.8;font-family:inherit;color:var(--text)"></pre>
+          </div>
+          <div id="wxpNotice" style="background:#f9731615;border:1px solid #f9731640;color:var(--orange);border-radius:11px;padding:12px 14px;font-size:12px;line-height:1.8;display:none;margin-bottom:13px">
+            ⚠️ 請先在「設定」→「WxPusher」填入 AppToken，成員也需各自填入 UID
+          </div>
+          <button class="btn btn-primary btn-full" id="sendBtn" onclick="sendReminder()">📤 發送至微信</button>
+        </div>
+      </div>
+
+      <!-- ─ SETTINGS ─ -->
+      <div id="sec-settings" class="section">
+        <div class="card" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:9px">🔐 目前身份</div>
+          <div id="currentIdentityInfo" style="font-size:13px;color:var(--muted);margin-bottom:12px"></div>
+          <button class="btn btn-ghost btn-full btn-sm" onclick="showIdentityOverlay()">切換身份</button>
+        </div>
+
+        <div class="card" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">🐦</span> Gitee 雲端同步</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">透過 Gitee 私有倉庫同步任務資料，HTML 文件直接發給成員使用</div>
+
+          <!-- How to use banner - manager only -->
+          <div id="giteeHowToBanner" style="background:linear-gradient(135deg,#0a1f10,#071a0f);border:1px solid #22c55e35;border-radius:12px;padding:14px 16px;margin-bottom:10px">
+            <div style="font-weight:700;font-size:12px;color:var(--green);margin-bottom:10px">📲 使用方式（直接分發）</div>
+            <div style="font-size:12px;color:#86c9a0;line-height:1.9">
+              1. 管理者完成下方 Gitee 設定後，把此 <strong style="color:var(--text)">HTML 文件</strong> 透過微信發給所有成員<br>
+              2. 成員收到後，用 <strong style="color:var(--text)">手機瀏覽器</strong>（Safari / Chrome）開啟<br>
+              3. iPhone：點底部「分享」→「加入主畫面」<br>
+                 Android：點右上角選單 →「安裝應用」或「加至主畫面」<br>
+              4. 加入後桌面出現圖示，開啟即如 <strong style="color:var(--text)">原生 App</strong>，無需下載
+            </div>
+          </div>
+
+          <div id="giteeSetupBanner" style="background:linear-gradient(135deg,#0f1a2e,#091420);border:1px solid #3b82f635;border-radius:12px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-weight:700;font-size:12px;color:var(--blue);margin-bottom:10px">🐦 Gitee 數據同步設定</div>
+            <div style="font-size:12px;color:#94b4d0;line-height:1.9">
+              1. 登入 <strong style="color:var(--text)">gitee.com</strong> → 新建<strong style="color:var(--text)">私有</strong>倉庫（如 tasklist-data）<br>
+              2. 倉庫內新建 <strong style="color:var(--text)">data.json</strong>，內容填 <code style="color:var(--teal)">{}</code> 並提交<br>
+              3. 右上角頭像 → 設定 → <strong style="color:var(--text)">私人令牌</strong> → 生成 Token<br>
+              4. 填入下方三欄，點「測試連線」確認成功
+            </div>
+          </div>
+          <div class="field"><span class="label">Gitee 用戶名</span><input id="giteeOwner" placeholder="你的 Gitee 用戶名"></div>
+          <div class="field"><span class="label">倉庫名稱</span><input id="giteeRepo" placeholder="tasklist-data"></div>
+          <div class="field"><span class="label">Private Token</span><input id="giteeToken" type="password" placeholder="你的 Gitee 私人令牌"></div>
+          <div style="display:flex;gap:9px">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="testGitee()">🔌 測試連線</button>
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveGiteeSettings()">儲存設定</button>
+          </div>
+          <div id="giteeStatus" style="margin-top:10px;font-size:12px;text-align:center;color:var(--muted)"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">💬</span> WxPusher 微信通知</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">免費推送至個人微信，每月 10,000 條</div>
+          <div id="wxpSetupGuide" style="background:#0a1020;border:1px solid #22c55e30;border-radius:12px;padding:15px;margin-bottom:14px">
+            <div style="font-weight:700;font-size:12px;color:var(--green);margin-bottom:11px">🚀 快速上手（5分鐘，免費）</div>
+            <div class="wxp-step"><div class="wxp-num">1</div><div style="font-size:12px;color:#94b4d0;line-height:1.7">前往 <strong style="color:var(--text)">wxpusher.zjianzhan.cn</strong> 免費註冊帳號</div></div>
+            <div class="wxp-step"><div class="wxp-num">2</div><div style="font-size:12px;color:#94b4d0;line-height:1.7">後台 → <strong style="color:var(--text)">應用管理</strong> → 新建應用 → 複製 AppToken</div></div>
+            <div class="wxp-step"><div class="wxp-num">3</div><div style="font-size:12px;color:#94b4d0;line-height:1.7">應用 → <strong style="color:var(--text)">關注管理</strong> → 生成二維碼，讓成員掃碼訂閱</div></div>
+            <div class="wxp-step" style="margin-bottom:0"><div class="wxp-num">4</div><div style="font-size:12px;color:#94b4d0;line-height:1.7">後台顯示成員 <strong style="color:var(--text)">UID</strong> → 填入各成員資料即可</div></div>
+          </div>
+          <div class="field"><span class="label">AppToken</span><input id="wxpToken" type="password" placeholder="AT_xxxxxxxxxxxxxx"></div>
+          <div style="display:flex;gap:9px">
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveWxpSettings()">儲存 AppToken</button>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="testWxPusher()">🔔 測試發送</button>
+          </div>
+          <div id="wxpTestHint" style="font-size:11px;color:var(--muted);margin-top:9px;line-height:1.7;padding:9px 11px;background:var(--input-bg);border-radius:8px;border:1px solid var(--border)">
+            測試前請確保：① 已儲存 AppToken　② 你的成員資料已填入個人 UID<br>
+            測試訊息將發送至你（目前登入成員）的微信
+          </div>
+        </div>
+
+        <!-- Feature 1: Auto Daily Reminder -->
+        <div class="card" id="autoReminderCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">⏰</span> 每日自動提醒</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">每天定時自動發送當日到期任務至所有成員（需保持頁面開啟）</div>
+          <div class="field">
+            <span class="label">發送時間</span>
+            <select id="autoReminderTime">
+              <option value="7">早上 7:00</option><option value="8">早上 8:00</option>
+              <option value="9" selected>早上 9:00</option><option value="10">早上 10:00</option>
+              <option value="17">下午 5:00</option><option value="18">下午 6:00</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="label">提醒對象</span>
+            <select id="autoReminderTarget">
+              <option value="all">全部成員</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border);margin-bottom:12px">
+            <div>
+              <div style="font-weight:600;font-size:13px">自動提醒狀態</div>
+              <div id="autoReminderStatus" style="font-size:11px;color:var(--muted);margin-top:2px">已停用</div>
+            </div>
+            <button onclick="toggleAutoReminder()" id="autoReminderToggle"
+              style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:transparent;color:var(--muted)">
+              啟用
+            </button>
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">
+            💡 提醒會在設定時間後、頁面開啟期間自動發送。建議管理者在工作時間保持頁面開啟。
+          </div>
+        </div>
+
+        <div class="card" id="aboutCard">
+          <div style="font-weight:700;margin-bottom:9px">ℹ️ 關於</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.9">
+            · 系統以 HTML 單一文件運作，直接發給成員使用<br>
+            · 任務資料透過 Gitee 私有倉庫同步，每 30 秒自動更新<br>
+            · 所有資料均不經過第三方伺服器，安全私密<br>
+            · AI 掃描需自備 Anthropic API Key<br>
+            · 支援 iPhone / Android 加至主畫面，體驗如原生 App
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /mainScroll -->
+  </div><!-- /colMain -->
+
+  <!-- SIDEBAR -->
+  <div id="colSide">
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:12px;color:var(--blue)">🔔 快速提醒</div>
+      <div class="field"><span class="label">提醒對象</span>
+        <select id="sideReminderTarget" onchange="updateSidePreview()"><option value="all">全部成員</option></select></div>
+      <div class="field"><span class="label">備注（選填）</span>
+        <input id="sideReminderNote" placeholder="附加說明..." oninput="updateSidePreview()"></div>
+      <div style="background:#050810;border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:12px;max-height:200px;overflow-y:auto">
+        <pre id="sidePreview" style="font-size:11px;white-space:pre-wrap;line-height:1.75;font-family:inherit;color:var(--text)"></pre>
+      </div>
+      <button class="btn btn-primary btn-full btn-sm" onclick="sendSideReminder()">📤 發送至微信</button>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:12px">☁️ 同步狀態</div>
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+        <span class="sync-dot" id="syncDot2" style="background:var(--muted);width:10px;height:10px"></span>
+        <span id="syncLabel2" style="font-size:13px;color:var(--muted)">未連線</span>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-full" onclick="manualSync()">🔄 立即同步</button>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:12px">👥 成員概覽</div>
+      <div id="sideMembers"></div>
+    </div>
+  </div>
+</div><!-- /twoCol -->
+</div><!-- /desktopWrapper -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobileNav">
+  <button class="nav-btn" id="nav-today"    onclick="switchTab('today',this)">    <span class="nav-icon">☀️</span><span>今日</span></button>
+  <button class="nav-btn active" id="nav-tasks"    onclick="switchTab('tasks',this)">    <span class="nav-icon">📋</span><span>任務</span></button>
+  <button class="nav-btn"        id="nav-members"  onclick="switchTab('members',this)">  <span class="nav-icon">👥</span><span>成員</span></button>
+  <button class="nav-btn"        id="nav-reminders"onclick="switchTab('reminders',this)"><span class="nav-icon">🔔</span><span>提醒</span></button>
+  <button class="nav-btn"        id="nav-settings" onclick="switchTab('settings',this)"> <span class="nav-icon">⚙️</span><span>設定</span></button>
+</nav>
+
+<script>
+// ══ STATE ═════════════════════════════════════════════════════════════════════
+let S={
+  tasks:[],members:[],
+  gitee:{owner:'',repo:'',token:''},
+  wxp:{appToken:''},
+  identity:{role:'',memberId:'',name:''},
+  autoReminder:{enabled:false,hour:9,target:'all'},
+  theme:'dark',
+  lastSha:'',
+};
+let F={status:'all',type:'all',member:'all',tag:''};
+let delId=null,editId=null,commentTaskId=null,scanned=[],dirty=false,syncTmr=null,autoReminderTmr=null;
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+let calSelDay=null;
+let mCalYear=new Date().getFullYear(),mCalMonth=new Date().getMonth();
+let mCalSelDay=null;
+
+const MC=['#3b82f6','#22c55e','#f97316','#a855f7','#ec4899','#14b8a6','#eab308','#f43f5e'];
+const RL={weekly:'每週',biweekly:'每兩週',monthly:'每月',bimonthly:'每兩個月',quarterly:'每季度',yearly:'每年度'};
+const DOW=['日','一','二','三','四','五','六'];
+const TAG_COLORS=['#3b82f6','#22c55e','#f97316','#a855f7','#ec4899','#14b8a6','#eab308','#f43f5e','#06b6d4','#84cc16'];
+// Helper: get all assignee IDs from a task (supports both old single & new multi)
+const getAIds=t=>Array.isArray(t.assigneeIds)&&t.assigneeIds.length?t.assigneeIds:(t.assigneeId?[t.assigneeId]:[]);
+const getTags=t=>Array.isArray(t.tags)?t.tags:[];
+const tagColor=tag=>{let h=0;for(const c of tag)h=(h*31+c.charCodeAt(0))%TAG_COLORS.length;return TAG_COLORS[h];};
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+
+// ══ BOOT ══════════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  loadLocal();
+  applyTheme();
+  const savedProvider=localStorage.getItem('tl_aiProvider')||'gemini';
+  document.getElementById('aiApiKey').value=localStorage.getItem('tl_aiKey')||'';
+  setAiProvider(savedProvider);
+  fillSettingsUI();
+  fillAutoReminderUI();
+  startAutoSync();
+  startAutoReminderScheduler();
+  adjustScroll();
+  window.addEventListener('resize',adjustScroll);
+  if(!S.identity.role){
+    buildIdentityOverlay();
+    document.getElementById('identityOverlay').style.display='flex';
+  } else {
+    document.getElementById('identityOverlay').style.display='none';
+    renderAll();
+  }
+});
+
+function adjustScroll(){
+  const mob=window.innerWidth<768;
+  const ms=document.getElementById('mainScroll');
+  if(mob){const hh=document.getElementById('appHeader').offsetHeight;ms.style.height=`calc(100vh - ${hh}px - var(--nav-h))`;}
+  else ms.style.height='auto';
+}
+
+// ══ IDENTITY ══════════════════════════════════════════════════════════════════
+function buildIdentityOverlay(){
+  const list=document.getElementById('idMemberList');
+  list.innerHTML=S.members.map((m,i)=>{
+    const c=MC[i%MC.length];
+    return `<button class="id-member-btn" onclick="selectIdentity('member','${m.id}')">
+      <div style="width:38px;height:38px;border-radius:50%;background:${c}25;border:2px solid ${c};color:${c};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0">${esc(m.name[0])}</div>
+      <div>
+        <div style="font-weight:700">${esc(m.name)}</div>
+        <div style="font-size:11px;color:var(--muted)">${m.dept?esc(m.dept):'成員'}</div>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function selectIdentity(role,memberId){
+  if(role==='manager'){
+    S.identity={role:'manager',memberId:'__manager__',name:'管理者'};
+  } else {
+    const m=S.members.find(m=>m.id===memberId);
+    if(!m)return;
+    S.identity={role:'member',memberId:m.id,name:m.name};
+  }
+  saveLocal();
+  document.getElementById('identityOverlay').style.display='none';
+  renderAll();
+  adjustScroll();
+  showToast(`歡迎，${S.identity.name} 👋`);
+}
+
+function showIdentityOverlay(){
+  buildIdentityOverlay();
+  document.getElementById('identityOverlay').style.display='flex';
+}
+
+// ══ STORAGE ═══════════════════════════════════════════════════════════════════
+function loadLocal(){
+  try{
+    const r=localStorage.getItem('tl_state');
+    if(r){
+      const saved=JSON.parse(r);
+      Object.assign(S,saved);
+      if(!S.autoReminder)S.autoReminder={enabled:false,hour:9,target:'all'};
+      if(!S.theme)S.theme='dark';
+    }
+    if(!S.members||!S.members.length) seed();
+    if(!S.identity)S.identity={role:'',memberId:'',name:''};
+  }catch(e){seed();}
+}
+function saveLocal(){
+  localStorage.setItem('tl_state',JSON.stringify({
+    tasks:S.tasks,members:S.members,gitee:S.gitee,wxp:S.wxp,
+    identity:S.identity,lastSha:S.lastSha,lastRemoteTs:S.lastRemoteTs,
+    autoReminder:S.autoReminder,theme:S.theme,
+  }));
+}
+function saveAiKey(){localStorage.setItem('tl_aiKey',document.getElementById('aiApiKey').value);}
+function setAiProvider(p){
+  localStorage.setItem('tl_aiProvider',p);
+  const gBtn=document.getElementById('aiProviderGemini');
+  const aBtn=document.getElementById('aiProviderAnthropic');
+  const infoBox=document.getElementById('geminiInfoBox');
+  const keyLabel=document.getElementById('aiKeyLabel');
+  const keyInput=document.getElementById('aiApiKey');
+  if(p==='gemini'){
+    if(gBtn){gBtn.style.borderColor='var(--blue)';gBtn.style.background='#3b82f620';gBtn.style.color='var(--blue)';}
+    if(aBtn){aBtn.style.borderColor='var(--border)';aBtn.style.background='transparent';aBtn.style.color='var(--muted)';}
+    if(infoBox)infoBox.style.display='';
+    if(keyLabel)keyLabel.textContent='Gemini API Key';
+    if(keyInput)keyInput.placeholder='AIzaSy...';
+  } else {
+    if(aBtn){aBtn.style.borderColor='var(--blue)';aBtn.style.background='#3b82f620';aBtn.style.color='var(--blue)';}
+    if(gBtn){gBtn.style.borderColor='var(--border)';gBtn.style.background='transparent';gBtn.style.color='var(--muted)';}
+    if(infoBox)infoBox.style.display='none';
+    if(keyLabel)keyLabel.textContent='Anthropic API Key';
+    if(keyInput)keyInput.placeholder='sk-ant-...';
+  }
+}
+
+function seed(){
+  S.members=[
+    {id:'m1',name:'黃琴茹',wxpUid:'',wechatId:'huang_qinru',dept:'香港'},
+    {id:'m2',name:'戴豐逸',wxpUid:'',wechatId:'dai_fengyi', dept:'深圳'},
+    {id:'m3',name:'李志明',wxpUid:'',wechatId:'li_zhiming', dept:'廣州'},
+  ];
+  const d=(offset)=>{const d=new Date();d.setDate(d.getDate()+offset);return d.toISOString().slice(0,10);};
+  S.tasks=[
+    {id:'t1',title:'整理Q1財務報告並提交董事會審批',assigneeIds:['m1'],deadline:d(7),  type:'deadline',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
+    {id:'t2',title:'追蹤辦理情形存放於雲端並回報',  assigneeIds:['m1'],type:'recurring',recurrence:'weekly',recurrenceDay:1,  priority:'normal',completed:false,createdAt:new Date().toISOString()},
+    {id:'t3',title:'製作支票並上簽',                 assigneeIds:['m1'],deadline:d(-2), type:'deadline',priority:'normal',completed:true, createdAt:new Date().toISOString()},
+    {id:'t4',title:'月度合規報告審查',               assigneeIds:['m2'],type:'recurring',recurrence:'monthly',recurrenceDay:1, priority:'normal',completed:false,createdAt:new Date().toISOString()},
+    {id:'t5',title:'更新供應商聯絡名單',             assigneeIds:['m3'],deadline:d(2),  type:'deadline',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
+    {id:'t6',title:'季度業績回顧報告',               assigneeIds:['m2','m3'],type:'recurring',recurrence:'quarterly',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
+    {id:'t7',title:'確認4月份工作人員並提交公會計納保',assigneeIds:['m1'],deadline:d(1), type:'deadline',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
+  ];
+  S.identity={role:'',memberId:'',name:''};
+  S.lastSha='';
+  saveLocal();
+}
+
+// ══ GITEE ═════════════════════════════════════════════════════════════════════
+const gBase=()=>`https://gitee.com/api/v5/repos/${S.gitee.owner}/${S.gitee.repo}/contents/data.json`;
+async function giteeGet(){
+  if(!S.gitee.token||!S.gitee.owner||!S.gitee.repo)return null;
+  try{
+    const r=await fetch(`${gBase()}?access_token=${S.gitee.token}`);
+    if(!r.ok)return null;
+    const j=await r.json();S.lastSha=j.sha;
+    // Fix: properly decode UTF-8 Chinese characters from base64
+    const decoded=decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))));
+    return JSON.parse(decoded);
+  }catch(e){return null;}
+}
+async function giteePush(d){
+  if(!S.gitee.token||!S.gitee.owner||!S.gitee.repo)return false;
+  try{
+    const c=btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2))));
+    const r=await fetch(gBase(),{method:S.lastSha?'PUT':'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({access_token:S.gitee.token,message:'sync',content:c,sha:S.lastSha})});
+    if(r.ok){const j=await r.json();S.lastSha=j.content?.sha||S.lastSha;return true;}
+    return false;
+  }catch(e){return false;}
+}
+async function testGitee(){
+  const el=document.getElementById('giteeStatus');
+  el.textContent='🔌 連線中...';el.style.color='var(--muted)';
+  saveGiteeSettings(true);
+  const d=await giteeGet();
+  if(d!==null){
+    el.textContent='✅ 連線成功！';el.style.color='var(--green)';setSyncStatus('online');
+    if(d.tasks)S.tasks=d.tasks;if(d.members)S.members=d.members;
+    saveLocal();renderAll();showToast('已從 Gitee 載入最新資料');
+  }else{el.textContent='❌ 連線失敗，請檢查設定';el.style.color='var(--red)';setSyncStatus('offline');}
+}
+function saveGiteeSettings(s=false){
+  S.gitee.owner=document.getElementById('giteeOwner').value.trim();
+  S.gitee.repo =document.getElementById('giteeRepo').value.trim();
+  S.gitee.token=document.getElementById('giteeToken').value.trim();
+  saveLocal();if(!s)showToast('Gitee 設定已儲存');
+}
+function saveWxpSettings(){S.wxp.appToken=document.getElementById('wxpToken').value.trim();saveLocal();showToast('WxPusher AppToken 已儲存');}
+async function syncUp(){
+  if(!dirty)return;
+  // ── Timestamp conflict check ──────────────────────────────────────────────
+  // Before pushing, fetch the current remote timestamp to detect concurrent edits
+  if(S.gitee.token&&S.gitee.owner&&S.gitee.repo&&S.lastRemoteTs){
+    try{
+      const r=await fetch(`${gBase()}?access_token=${S.gitee.token}`);
+      if(r.ok){
+        const j=await r.json();
+        const remoteDec=decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))));
+        const remoteData=JSON.parse(remoteDec);
+        // If remote timestamp is NEWER than the one we last pulled, someone else updated
+        if(remoteData.ts&&remoteData.ts>S.lastRemoteTs){
+          S.lastSha=j.sha; // keep SHA fresh
+          showConflictModal(remoteData);
+          return; // abort push until resolved
+        }
+      }
+    }catch(e){/* network issue - proceed with push */}
+  }
+  await forcePush();
+}
+
+async function forcePush(){
+  const payload={tasks:S.tasks,members:S.members,ts:Date.now()};
+  const ok=await giteePush(payload);
+  if(ok){
+    dirty=false;
+    S.lastRemoteTs=payload.ts;
+    saveLocal();
+    setSyncStatus('online');
+  }else setSyncStatus('offline');
+}
+
+// ── Conflict Modal ─────────────────────────────────────────────────────────
+let conflictRemoteData=null;
+function showConflictModal(remoteData){
+  conflictRemoteData=remoteData;
+  const el=document.getElementById('conflictModal');
+  const rTime=remoteData.ts?new Date(remoteData.ts).toLocaleString('zh-TW'):'未知';
+  document.getElementById('conflictInfo').textContent=`遠端資料最後更新：${rTime}，可能有其他成員剛剛修改了資料。`;
+  el.style.display='flex';
+}
+function closeConflictModal(){document.getElementById('conflictModal').style.display='none';conflictRemoteData=null;}
+async function conflictOverwrite(){
+  // Force push local data, ignoring remote changes
+  closeConflictModal();
+  await forcePush();
+  showToast('已強制更新至 Gitee');
+}
+function conflictLoadRemote(){
+  // Discard local changes, accept remote data
+  if(!conflictRemoteData)return;
+  if(conflictRemoteData.tasks) S.tasks=conflictRemoteData.tasks;
+  if(conflictRemoteData.members) S.members=conflictRemoteData.members;
+  S.lastRemoteTs=conflictRemoteData.ts||Date.now();
+  dirty=false;
+  saveLocal();renderAll();
+  closeConflictModal();
+  showToast('已載入最新遠端資料');
+}
+function conflictMerge(){
+  // Smart merge: keep local tasks that don't exist remotely, accept remote for the rest
+  if(!conflictRemoteData)return;
+  const remoteIds=new Set((conflictRemoteData.tasks||[]).map(t=>t.id));
+  const localOnly=S.tasks.filter(t=>!remoteIds.has(t.id)&&(t.createdAt>(new Date(S.lastRemoteTs||0).toISOString())));
+  S.tasks=[...(conflictRemoteData.tasks||[]),...localOnly];
+  if(conflictRemoteData.members) S.members=conflictRemoteData.members;
+  S.lastRemoteTs=conflictRemoteData.ts||Date.now();
+  dirty=true;
+  saveLocal();renderAll();
+  closeConflictModal();
+  forcePush();
+  showToast('✓ 已智能合併，本地新增任務已保留');
+}
+async function syncDown(){
+  const d=await giteeGet();if(!d){setSyncStatus('offline');return;}
+  const rIds=new Set((d.tasks||[]).map(t=>t.id));
+  const lNew=S.tasks.filter(t=>!rIds.has(t.id));
+  S.tasks=[...(d.tasks||[]),...lNew];
+  if(d.members)S.members=d.members;
+  if(d.ts)S.lastRemoteTs=d.ts; // track remote timestamp for conflict detection
+  setSyncStatus('online');
+  const n=new Date(),ts=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')} 已同步`;
+  ['syncLabel','syncLabel2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=ts;});
+  saveLocal();renderAll();
+}
+function startAutoSync(){if(syncTmr)clearInterval(syncTmr);syncTmr=setInterval(async()=>{await syncDown();if(dirty)await syncUp();},30000);if(S.gitee.token)syncDown();}
+async function manualSync(){setSyncStatus('syncing');await syncDown();if(dirty)await syncUp();}
+function setSyncStatus(s){
+  const c={online:'var(--green)',syncing:'var(--orange)',offline:'var(--muted)'};
+  ['syncDot','syncDot2'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.background=c[s];});
+  if(s==='offline'){['syncLabel','syncLabel2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='未連線';});}
+}
+async function markDirty(){dirty=true;saveLocal();setSyncStatus('syncing');await syncUp();}
+
+// ══ RENDER ════════════════════════════════════════════════════════════════════
+function renderAll(){
+  updateIdentityUI();
+  renderStats();
+  renderAlertBanner();
+  renderToday();
+  renderTasks();
+  renderMembers();
+  fillReminderSels();
+  renderSideMembers();
+  updateMemberFilter();
+  updateRoleUI();
+  updateReminderPreview();
+  updateSidePreview();
+  renderCalendar();
+  renderMemberCalendar();
+  updateAutoReminderUI();
+}
+
+const isOverdue=t=>t.deadline&&!t.completed&&new Date(t.deadline+'T00:00:00')<TODAY;
+const isDueSoon=t=>t.deadline&&!t.completed&&!isOverdue(t)&&(new Date(t.deadline+'T00:00:00')-TODAY)<=3*86400000;
+const mColor=id=>MC[Math.max(0,S.members.findIndex(m=>m.id===id))%MC.length];
+const mGet=id=>S.members.find(m=>m.id===id);
+const isMgr=()=>S.identity.role==='manager';
+const myId=()=>S.identity.memberId;
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function getMyTasks(){return S.tasks.filter(t=>getAIds(t).includes(myId()));}
+
+function updateIdentityUI(){
+  const {role,name,memberId}=S.identity;
+  if(!role){document.getElementById('identityBtn').style.display='flex';return;}
+  const btn=document.getElementById('identityBtn');
+  const m=S.members.find(m=>m.id===memberId);
+  const c=m?mColor(memberId):'var(--blue)';
+  btn.style.borderColor=c+'50';btn.style.background=c+'20';btn.style.color=c;
+  document.getElementById('identityAvatar').textContent=role==='manager'?'👔':(m?m.name[0]:'👤');
+  document.getElementById('identityName').textContent=name;
+  // Settings info
+  const si=document.getElementById('currentIdentityInfo');
+  if(si)si.textContent=role==='manager'?'目前以管理者身份登入，可查看及管理全團隊任務':`目前以成員「${name}」身份登入，只顯示個人任務`;
+}
+
+function renderStats(){
+  // Team stats (all tasks)
+  const T=S.tasks;
+  const tP=T.filter(t=>!t.completed).length,tD=T.filter(t=>t.completed).length;
+  const tU=T.filter(t=>t.priority==='urgent'&&!t.completed).length,tO=T.filter(t=>isOverdue(t)).length;
+  const dlD=T.filter(t=>t.type==='deadline'&&t.completed).length,dlT=T.filter(t=>t.type==='deadline').length;
+  const rcD=T.filter(t=>t.type==='recurring'&&t.completed).length,rcT=T.filter(t=>t.type==='recurring').length;
+  set('tStatPending',tP);set('tStatDone',tD);set('tStatUrgent',tU);set('tStatOverdue',tO);
+  const dp=dlT>0?Math.round(dlD/dlT*100):0,rp=rcT>0?Math.round(rcD/rcT*100):0;
+  set('tpDeadline',`${dlD}/${dlT} (${dp}%)`);setW('tpDeadlineFill',dp);
+  set('tpRecurring',`${rcD}/${rcT} (${rp}%)`);setW('tpRecurringFill',rp);
+
+  // Personal stats
+  const M=S.tasks.filter(t=>getAIds(t).includes(myId()));
+  const mP=M.filter(t=>!t.completed).length,mD=M.filter(t=>t.completed).length;
+  const mU=M.filter(t=>t.priority==='urgent'&&!t.completed).length,mO=M.filter(t=>isOverdue(t)).length;
+  const mdlD=M.filter(t=>t.type==='deadline'&&t.completed).length,mdlT=M.filter(t=>t.type==='deadline').length;
+  const mrcD=M.filter(t=>t.type==='recurring'&&t.completed).length,mrcT=M.filter(t=>t.type==='recurring').length;
+  set('mStatPending',mP);set('mStatDone',mD);set('mStatUrgent',mU);set('mStatOverdue',mO);
+  const mdp=mdlT>0?Math.round(mdlD/mdlT*100):0,mrp=mrcT>0?Math.round(mrcD/mrcT*100):0;
+  set('mpDeadline',`${mdlD}/${mdlT} (${mdp}%)`);setW('mpDeadlineFill',mdp);
+  set('mpRecurring',`${mrcD}/${mrcT} (${mrp}%)`);setW('mpRecurringFill',mrp);
+
+  // Show/hide sections
+  const ts=document.getElementById('teamOverviewSection');
+  const ps=document.getElementById('personalOverviewSection');
+  const pl=document.getElementById('personalLabel');
+  if(isMgr()){
+    ts.style.display='';ps.style.display='';
+    if(pl)pl.textContent='👤 我的任務（所有管理者視角）';
+    // For manager, show their own personal = all tasks as team lead? 
+    // Actually for manager personal overview, show all tasks too (they oversee everything)
+    // Let's keep personal = all for manager since manager doesn't have a personal assigneeId
+    // Better: hide personal section for manager since team already shows all
+    ps.style.display='none';
+  } else if(S.identity.role==='member'){
+    ts.style.display='none';ps.style.display='';
+    const m=mGet(myId());
+    if(pl&&m)pl.textContent=`👤 ${m.name} 的任務`;
+  } else {
+    ts.style.display='none';ps.style.display='none';
+  }
+}
+
+function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function setW(id,pct){const e=document.getElementById(id);if(e)e.style.width=pct+'%';}
+
+function renderAlertBanner(){
+  const banner=document.getElementById('alertBanner');
+  const scope=isMgr()?S.tasks:getMyTasks();
+  const urgent=scope.filter(t=>t.priority==='urgent'&&!t.completed);
+  const soon=scope.filter(t=>isDueSoon(t)&&t.priority!=='urgent');
+  if(!urgent.length&&!soon.length){banner.style.display='none';return;}
+  let html='';
+  if(urgent.length){
+    html+=`<div style="color:var(--red);font-weight:700;margin-bottom:5px">🚨 緊急任務（${urgent.length} 項）</div>`;
+    urgent.slice(0,3).forEach(t=>{
+      const aids=getAIds(t);const names=aids.map(id=>mGet(id)?.name).filter(Boolean).join('、');
+      html+=`<div style="font-size:12px;color:#f87171;margin-bottom:3px">• ${esc(t.title)}${names&&isMgr()?` <span style="color:var(--muted)">— ${esc(names)}</span>`:''}${t.deadline?` <span style="color:var(--muted)">[${t.deadline}]</span>`:''}</div>`;
+    });
+    if(urgent.length>3)html+=`<div style="font-size:11px;color:var(--muted);margin-bottom:3px">...及其他 ${urgent.length-3} 項緊急任務</div>`;
+  }
+  if(urgent.length&&soon.length)html+=`<div style="border-top:1px solid #ef444422;margin:8px 0"></div>`;
+  if(soon.length){
+    html+=`<div style="color:var(--orange);font-weight:700;margin-bottom:5px">⏰ 3天內到期（${soon.length} 項）</div>`;
+    soon.slice(0,3).forEach(t=>{
+      const aids=getAIds(t);const names=aids.map(id=>mGet(id)?.name).filter(Boolean).join('、');
+      const daysLeft=Math.ceil((new Date(t.deadline+'T00:00:00')-TODAY)/86400000);
+      html+=`<div style="font-size:12px;color:#fb923c;margin-bottom:3px">• ${esc(t.title)}${names&&isMgr()?` <span style="color:var(--muted)">— ${esc(names)}</span>`:''} <span style="color:var(--muted)">[${daysLeft===0?'今天':daysLeft+'天後'} ${t.deadline}]</span></div>`;
+    });
+    if(soon.length>3)html+=`<div style="font-size:11px;color:var(--muted)">...及其他 ${soon.length-3} 項</div>`;
+  }
+  banner.innerHTML=html;
+  banner.style.display='block';
+  banner.className=soon.length&&!urgent.length?'has-warn':'';
+  // Add margin below banner
+  banner.style.marginBottom='10px';
+}
+
+function clearSearch(){
+  const el=document.getElementById('taskSearch');if(el)el.value='';
+  const cb=document.getElementById('searchClearBtn');if(cb)cb.style.display='none';
+  renderTasks();
+}
+
+function getSearchQ(){
+  const el=document.getElementById('taskSearch');
+  if(!el)return'';
+  const q=el.value.trim().toLowerCase();
+  const cb=document.getElementById('searchClearBtn');
+  if(cb)cb.style.display=q?'block':'none';
+  return q;
+}
+
+function getFiltered(){
+  const q=getSearchQ();
+  return S.tasks.filter(t=>{
+    const aids=getAIds(t);
+    if(!isMgr()&&!aids.includes(myId()))return false;
+    const s=F.status;
+    if(s==='completed'&&!t.completed)return false;
+    if(s==='pending'&&t.completed)return false;
+    if(s==='urgent'&&(t.priority!=='urgent'||t.completed))return false;
+    if(s==='overdue'&&!isOverdue(t))return false;
+    if(F.type!=='all'&&t.type!==F.type)return false;
+    if(F.member!=='all'&&!aids.includes(F.member))return false;
+    if(q){
+      const hit=t.title.toLowerCase().includes(q)
+        ||(t.description&&t.description.toLowerCase().includes(q))
+        ||aids.some(id=>{const m=mGet(id);return m&&m.name.toLowerCase().includes(q);})
+        ||getTags(t).some(tag=>tag.toLowerCase().includes(q));
+      if(!hit)return false;
+    }
+    if(F.tag&&!getTags(t).includes(F.tag))return false;
+    return true;
+  });
+}
+
+function recurLabel(t){
+  const base=RL[t.recurrence]||t.recurrence||'';
+  if(t.recurrenceDay!=null){
+    if(t.recurrence==='weekly'||t.recurrence==='biweekly')
+      return `${base}（星期${DOW[t.recurrenceDay]}）`;
+    if(t.recurrence==='monthly'||t.recurrence==='bimonthly')
+      return `${base}（${t.recurrenceDay}號）`;
+  }
+  return base;
+}
+
+function renderTasks(){
+  const list=document.getElementById('taskList'),fil=getFiltered();
+  if(!fil.length){list.innerHTML=`<div style="text-align:center;color:var(--muted);padding:52px 0"><div style="font-size:40px;margin-bottom:11px">📭</div><div>沒有符合的任務</div></div>`;document.getElementById('taskCount').textContent='';return;}
+  list.innerHTML=fil.map(t=>{
+    const aids=getAIds(t),ov=isOverdue(t),ds=isDueSoon(t);
+    const bd=[];
+    if(isMgr()){
+      aids.forEach(aid=>{const m=mGet(aid),c=mColor(aid);if(m)bd.push(`<span class="badge" style="background:${c}20;color:${c}">${esc(m.name)}</span>`);});
+    }
+    if(t.priority==='urgent')bd.push(`<span class="badge" style="background:#ef444420;color:#ef4444">🚨 緊急</span>`);
+    if(t.type==='deadline'&&t.deadline)bd.push(`<span class="badge" style="background:${ov?'#ef444420':ds?'#f9731620':'#1e2d45'};color:${ov?'#ef4444':ds?'var(--orange)':'var(--muted)'}">${ov?'⚠️ 逾期':ds?'⏰ 即將到期':'📅'} ${t.deadline}</span>`);
+    if(t.type==='recurring'&&t.recurrence)bd.push(`<span class="badge" style="background:#22c55e18;color:#22c55e">🔄 ${recurLabel(t)}</span>`);
+    if(t.source==='ai')bd.push(`<span class="badge" style="background:#a855f720;color:#a855f7;font-size:10px">AI</span>`);
+    // Tags
+    getTags(t).forEach(tag=>bd.push(`<span class="task-tag" style="background:${tagColor(tag)}18;color:${tagColor(tag)};border-color:${tagColor(tag)}40" onclick="filterByTag('${esc(tag)}')">#${esc(tag)}</span>`));
+    const bg=ov?'var(--card)':ds?'var(--card)':'var(--card)';
+    const bgl=ov?'#1a0d0d':ds?'#1a1000':null;
+    const bc=ov?'#ef444435':ds?'#f9731635':t.priority==='urgent'?'#f9731630':'var(--border)';
+    const bgStyle=bgl?`background:${bgl}`:'';
+    const q=getSearchQ();
+    const highlightText=(text)=>{
+      if(!q||!text)return esc(text||'');
+      const idx=text.toLowerCase().indexOf(q);
+      if(idx<0)return esc(text);
+      return esc(text.slice(0,idx))+`<mark style="background:#eab30840;color:#eab308;border-radius:3px;padding:0 2px">${esc(text.slice(idx,idx+q.length))}</mark>`+esc(text.slice(idx+q.length));
+    };
+    const titleHtml=highlightText(t.title);
+    const descHtml=t.description?`<div style="font-size:12px;color:var(--muted);margin-bottom:7px;line-height:1.5">${highlightText(t.description)}</div>`:'';
+    const comments=t.comments||[];
+    const lastComment=comments.length?comments[comments.length-1]:null;
+    const progress=t.progress||0;
+    const progressBar=progress>0?`<div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progress}%;background:${progress===100?'var(--green)':progress>=50?'var(--blue)':'var(--orange)'}"></div></div>`:'';
+    const commentBadge=comments.length?`<span style="font-size:10px;color:var(--muted);margin-left:4px">💬${comments.length}</span>`:'';
+    const lastCommentHtml=lastComment?`<div style="font-size:11px;color:var(--muted);margin-top:5px;padding:5px 8px;background:var(--input-bg);border-radius:7px;border-left:2px solid var(--border)">
+      <span style="font-weight:600">${esc(lastComment.author||'未知')}</span>：${esc(lastComment.text.slice(0,60))}${lastComment.text.length>60?'...':''}
+    </div>`:'';
+    return `<div class="task-card${t.completed?' done':''}${ov?' overdue':''}${t.priority==='urgent'&&!ov?' urgent-card':''}" style="${bgStyle};border:1px solid ${bc}">
+      <div style="display:flex;gap:11px;align-items:flex-start">
+        <button onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:1px;border:2px solid ${t.completed?'var(--green)':'var(--border)'};background:${t.completed?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;transition:all .2s;min-width:24px">${t.completed?'✓':''}</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px;line-height:1.45;margin-bottom:${t.description?'4px':'8px'};text-decoration:${t.completed?'line-through':'none'};color:${t.completed?'var(--muted)':'var(--text)'}">${titleHtml}${commentBadge}</div>
+          ${descHtml}
+          ${progressBar}
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:${progressBar?'6px':'0'}">${bd.join('')}</div>
+          ${lastCommentHtml}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button onclick="openCommentModal('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:16px;padding:2px 4px;line-height:1;min-height:32px;display:flex;align-items:center" title="進度備注" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--muted)'">💬</button>
+          ${isMgr()?`<button onclick="openEditTaskModal('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:15px;padding:2px 4px;line-height:1;min-height:28px;display:flex;align-items:center" title="修改" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">✏️</button>
+          <button onclick="openDel('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:18px;padding:2px 4px;line-height:1;min-height:28px;display:flex;align-items:center" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">×</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const myTotal=!isMgr()?getMyTasks().length:S.tasks.length;
+  document.getElementById('taskCount').textContent=`共 ${fil.length} / ${myTotal} 個任務`;
+}
+
+
+function renderMembers(){
+  const list=document.getElementById('memberList');
+  const showAll=isMgr();
+  const visibleMembers=showAll?S.members:S.members.filter(m=>m.id===myId());
+  list.innerHTML=visibleMembers.map((m,idx)=>{
+    const i=S.members.findIndex(x=>x.id===m.id);
+    const c=MC[i%MC.length],mt=S.tasks.filter(t=>getAIds(t).includes(m.id));
+    const pend=mt.filter(t=>!t.completed).length,done=mt.filter(t=>t.completed).length;
+    const urg=mt.filter(t=>t.priority==='urgent'&&!t.completed).length,ovd=mt.filter(t=>isOverdue(t)).length;
+    const pct=mt.length>0?Math.round(done/mt.length*100):0;
+    const canEdit=isMgr()||m.id===myId();
+    const isMe=m.id===myId();
+    const rec=mt.filter(t=>!t.completed).slice(0,3);
+    return `<div class="card" style="border-radius:14px;padding:15px;margin-bottom:12px;border-color:${c}25">
+      <div style="display:flex;align-items:center;gap:13px;margin-bottom:13px">
+        <div class="avatar" style="width:50px;height:50px;background:${c}20;border:2.5px solid ${c};color:${c};font-size:19px">${esc(m.name[0])}</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:15px">${esc(m.name)}${isMe?` <span style="font-size:10px;background:var(--blue);color:#fff;padding:2px 8px;border-radius:10px">我</span>`:''}</div>
+          <div style="font-size:11px;color:var(--muted)">${m.dept?esc(m.dept)+'　·　':''}WxP UID：${m.wxpUid?'✅ 已設定':'未設定'}</div>
+        </div>
+        <div style="text-align:right"><div style="font-size:24px;font-weight:800;color:${c};letter-spacing:-.02em">${pct}%</div><div style="font-size:10px;color:var(--muted)">完成率</div></div>
+      </div>
+      <div class="stat-grid" style="margin-bottom:11px">
+        <div class="stat-box"><div class="stat-num" style="color:var(--blue);font-size:18px">${pend}</div><div class="stat-lbl">待辦</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:var(--green);font-size:18px">${done}</div><div class="stat-lbl">完成</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:var(--red);font-size:18px">${urg}</div><div class="stat-lbl">緊急</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:var(--orange);font-size:18px">${ovd}</div><div class="stat-lbl">逾期</div></div>
+      </div>
+      <div class="pbar-track" style="margin-bottom:11px"><div class="pbar-fill" style="background:linear-gradient(90deg,${c},${c}99);width:${pct}%"></div></div>
+      ${rec.map(t=>`<div style="margin-bottom:5px;padding:7px 10px;background:#050810;border-radius:9px;font-size:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)">
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.title)}</span>
+        <span style="margin-left:8px;flex-shrink:0;font-size:10px;color:${isOverdue(t)?'var(--red)':isDueSoon(t)?'var(--orange)':t.priority==='urgent'?'var(--orange)':'var(--muted)'}">
+          ${isOverdue(t)?'⚠️':isDueSoon(t)?'⏰':t.priority==='urgent'?'🚨':t.deadline?t.deadline:t.recurrence?RL[t.recurrence]:''}</span></div>`).join('')}
+      <div style="display:flex;gap:8px;margin-top:11px">
+        ${canEdit?`<button class="btn btn-ghost btn-sm" style="flex:1" onclick="openMemberModal('${m.id}')">✏️ 編輯</button>`:''}
+        ${isMgr()?`<button class="btn btn-sm" style="flex:1;background:${c}18;color:${c};border:1px solid ${c}40;border-radius:9px;font-weight:700;min-height:38px" onclick="quickReminder('${m.id}')">🔔 提醒</button>`:''}
+        ${isMgr()?`<button class="btn btn-danger btn-sm" onclick="delMember('${m.id}')">刪除</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  // Rebuild assignee checkboxes if form is open
+  if(document.getElementById('addTaskForm').style.display!=='none') buildAssigneeCheckboxes('fAssigneeList',[]);
+}
+
+function renderSideMembers(){
+  const el=document.getElementById('sideMembers');if(!el)return;
+  el.innerHTML=S.members.map((m,i)=>{
+    const c=MC[i%MC.length],mt=S.tasks.filter(t=>getAIds(t).includes(m.id));
+    const pend=mt.filter(t=>!t.completed).length,urg=mt.filter(t=>t.priority==='urgent'&&!t.completed).length;
+    const pct=mt.length>0?Math.round(mt.filter(t=>t.completed).length/mt.length*100):0;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div class="avatar" style="width:36px;height:36px;background:${c}20;border:2px solid ${c};color:${c};font-size:14px">${esc(m.name[0])}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px">${esc(m.name)}</div>
+        <div style="font-size:11px;color:var(--muted)">${pend} 待辦${urg?` · <span style="color:var(--red)">${urg}緊急</span>`:''} · ${pct}% 完成</div>
+      </div></div>`;
+  }).join('');
+}
+
+function fillReminderSels(){
+  const opts='<option value="all">全部成員</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  ['reminderTarget','sideReminderTarget','autoReminderTarget'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML=opts;e.value=v||'all';}});
+  document.getElementById('wxpNotice').style.display=S.wxp.appToken?'none':'block';
+}
+
+function updateMemberFilter(){
+  const w=document.getElementById('memberFilters');
+  if(!isMgr()){w.style.display='none';return;}
+  w.style.display='flex';w.style.flexWrap='wrap';w.style.gap='6px';
+  const a=F.member;
+  w.innerHTML=`<button class="chip${a==='all'?' active':''}" onclick="setFilter('member','all',this)">全成員</button>`+
+    S.members.map((m,i)=>{const c=MC[i%MC.length];return`<button class="chip${a===m.id?' active':''}" onclick="setFilter('member','${m.id}',this)" style="${a===m.id?`border-color:${c};background:${c}20;color:${c}`:''}">
+      ${esc(m.name)}</button>`;}).join('');
+}
+
+function updateRoleUI(){
+  const mgr=isMgr();
+  document.getElementById('managerAddBtn').style.display=mgr?'':'none';
+  document.getElementById('addMemberSection').style.display=mgr?'':'none';
+  ['dReminderTab','nav-reminders'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';});
+  // Changes 5, 6, 7: manager-only settings sections
+  ['giteeHowToBanner','giteeSetupBanner','wxpSetupGuide','wxpTestHint','aboutCard','autoReminderCard'].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';
+  });
+}
+
+// ══ TABS ══════════════════════════════════════════════════════════════════════
+function switchTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+id);if(nb)nb.classList.add('active');
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
+  if(el&&el.classList&&el.classList.contains('dtab'))el.classList.add('active');
+  if(id==='reminders'){updateReminderPreview();updateSidePreview();}
+  const ms=document.getElementById('mainScroll');if(ms)ms.scrollTop=0;
+}
+function setFilter(type,val,el){
+  F[type]=val;
+  const gm={status:'#statusFilters',type:'#typeFilters',member:'#memberFilters'};
+  document.querySelectorAll(`${gm[type]} .chip`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');renderTasks();
+}
+
+// ══ VIEW TOGGLE ═══════════════════════════════════════════════════════════════
+function setTaskView(v,el){
+  document.getElementById('taskListView').style.display=v==='list'?'':'none';
+  document.getElementById('taskCalView').style.display=v==='cal'?'':'none';
+  document.querySelectorAll('.view-toggle .view-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(v==='cal')renderCalendar();
+}
+function setMembersView(v,el){
+  document.getElementById('membersListView').style.display=v==='list'?'':'none';
+  document.getElementById('membersCalView').style.display=v==='cal'?'':'none';
+  document.querySelectorAll('#sec-members .view-toggle .view-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(v==='cal')renderMemberCalendar();
+}
+
+// ══ CALENDAR ══════════════════════════════════════════════════════════════════
+const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+
+function getDeadlineTasks(scope){
+  // Returns tasks with actual deadlines
+  return scope.filter(t=>t.type==='deadline'&&t.deadline);
+}
+
+function buildCalendar(year,month,scope,selDay,onDayClick,containerId,monthLabelId,detailId){
+  const label=document.getElementById(monthLabelId);
+  if(label)label.textContent=`${year} 年 ${MONTH_NAMES[month]}`;
+  const first=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0).getDate();
+  const startDow=first.getDay();
+
+  // Build task map per date: deadline tasks on their date, overdue on deadline date, recurring on all occurrence dates in this month
+  const taskMap={};
+  const addToMap=(ds,t)=>{if(!taskMap[ds])taskMap[ds]=[];if(!taskMap[ds].find(x=>x.id===t.id))taskMap[ds].push(t);};
+
+  scope.forEach(t=>{
+    // Deadline tasks (including overdue) — show on deadline date regardless of month
+    if(t.type==='deadline'&&t.deadline){
+      const [ty,tm,td]=t.deadline.split('-').map(Number);
+      if(ty===year&&tm===month+1) addToMap(t.deadline,t);
+      // Overdue: if past months, still show on their deadline date if viewing that month
+    }
+    // Recurring tasks — show on all occurrence dates within this month
+    if(t.type==='recurring'&&t.recurrence){
+      getRecurringDatesInMonth(t,year,month).forEach(ds=>addToMap(ds,t));
+    }
+  });
+
+  const grid=document.getElementById(containerId);if(!grid)return;
+  let html='';
+  for(let i=0;i<startDow;i++)html+=`<div class="cal-day other-month"><div class="cal-day-num"></div></div>`;
+  for(let d=1;d<=lastDay;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const tasks=taskMap[ds]||[];
+    const isToday=new Date(year,month,d).toDateString()===new Date().toDateString();
+    const isSel=selDay===ds;
+    // Limit dots to 3 to avoid overflow
+    const shownTasks=tasks.slice(0,4);
+    const dots=shownTasks.map(t=>{
+      const dotColor=t.completed?'var(--green)':t.type==='recurring'?'var(--teal)':isOverdue(t)?'var(--orange)':t.priority==='urgent'?'var(--red)':'var(--blue)';
+      return `<span class="cal-dot" style="background:${dotColor}"></span>`;
+    }).join('');
+    html+=`<div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="${onDayClick}('${ds}')">
+      <div class="cal-day-num">${d}</div>
+      <div class="cal-dots">${dots}${tasks.length>4?`<span style="font-size:8px;color:var(--muted)">+${tasks.length-4}</span>`:''}</div>
+    </div>`;
+  }
+  const total=startDow+lastDay;
+  const rem=total%7===0?0:7-(total%7);
+  for(let i=0;i<rem;i++)html+=`<div class="cal-day other-month"><div class="cal-day-num"></div></div>`;
+  grid.innerHTML=html;
+}
+
+// Get all dates a recurring task falls on within a given year/month
+function getRecurringDatesInMonth(t,year,month){
+  const dates=[];
+  const r=t.recurrence;
+  // Determine reference start date
+  let refDate=t.recurrenceStart?new Date(t.recurrenceStart+'T00:00:00'):t.deadline?new Date(t.deadline+'T00:00:00'):null;
+  if(!refDate)return dates;
+  const dayInMonth=(y,m,day)=>{const max=new Date(y,m+1,0).getDate();return Math.min(day,max);};
+  const pad=n=>String(n).padStart(2,'0');
+  const ds=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;
+
+  if(r==='weekly'||r==='biweekly'){
+    const step=r==='weekly'?7:14;
+    const targetDow=t.recurrenceDay!=null?t.recurrenceDay:refDate.getDay();
+    // Find first occurrence of targetDow >= refDate
+    let cur=new Date(refDate);
+    while(cur.getDay()!==targetDow)cur.setDate(cur.getDate()+1);
+    // Advance to current month range if needed
+    while(cur<new Date(year,month,1))cur.setDate(cur.getDate()+step);
+    while(cur<=new Date(year,month+1,0)){
+      if(cur.getFullYear()===year&&cur.getMonth()===month)
+        dates.push(ds(cur.getFullYear(),cur.getMonth(),cur.getDate()));
+      cur.setDate(cur.getDate()+step);
+    }
+  } else if(r==='monthly'||r==='bimonthly'){
+    const step=r==='monthly'?1:2;
+    const targetDay=t.recurrenceDay!=null?t.recurrenceDay:refDate.getDate();
+    // Check if this month is a valid month (distance from refDate month is multiple of step)
+    const refYear=refDate.getFullYear(),refMon=refDate.getMonth();
+    const monthsDiff=(year-refYear)*12+(month-refMon);
+    if(monthsDiff>=0&&monthsDiff%step===0){
+      const d=dayInMonth(year,month,targetDay);
+      dates.push(ds(year,month,d));
+    }
+  } else if(r==='quarterly'){
+    const refYear=refDate.getFullYear(),refMon=refDate.getMonth();
+    const monthsDiff=(year-refYear)*12+(month-refMon);
+    if(monthsDiff>=0&&monthsDiff%3===0){
+      const d=t.recurrenceDay!=null?dayInMonth(year,month,t.recurrenceDay):refDate.getDate();
+      dates.push(ds(year,month,d));
+    }
+  } else if(r==='yearly'){
+    if(refDate.getMonth()===month){
+      const d=t.recurrenceDay!=null?dayInMonth(year,month,t.recurrenceDay):refDate.getDate();
+      dates.push(ds(year,month,d));
+    }
+  }
+  return dates;
+}
+
+function renderCalendar(){
+  const scope=isMgr()?S.tasks:getMyTasks();
+  buildCalendar(calYear,calMonth,scope,calSelDay,'selectCalDay','calDays','calMonthLabel','calDayDetail');
+  if(calSelDay)renderCalDayDetail(calSelDay);
+}
+function renderMemberCalendar(){
+  const scope=isMgr()?S.tasks:getMyTasks();
+  buildCalendar(mCalYear,mCalMonth,scope,mCalSelDay,'selectMCalDay','mCalDays','mCalMonthLabel','mCalDayDetail');
+  if(mCalSelDay)renderMCalDayDetail(mCalSelDay);
+}
+
+function selectCalDay(ds){
+  calSelDay=calSelDay===ds?null:ds;
+  renderCalendar();
+  if(calSelDay)renderCalDayDetail(calSelDay);
+  else document.getElementById('calDayDetail').style.display='none';
+}
+function selectMCalDay(ds){
+  mCalSelDay=mCalSelDay===ds?null:ds;
+  renderMemberCalendar();
+  if(mCalSelDay)renderMCalDayDetail(mCalSelDay);
+  else document.getElementById('mCalDayDetail').style.display='none';
+}
+
+function renderCalDayDetail(ds){
+  renderDayDetail(ds,'calDayDetail',isMgr()?S.tasks:getMyTasks(),true);
+}
+function renderMCalDayDetail(ds){
+  renderDayDetail(ds,'mCalDayDetail',isMgr()?S.tasks:getMyTasks(),isMgr());
+}
+
+function renderDayDetail(ds,containerId,scope,showMember){
+  const el=document.getElementById(containerId);if(!el)return;
+  // Include deadline tasks on that date + recurring tasks that fall on that date
+  const [y,mo,d]=ds.split('-').map(Number);
+  const deadlineTasks=scope.filter(t=>t.type==='deadline'&&t.deadline===ds);
+  const recurringTasks=scope.filter(t=>t.type==='recurring'&&getRecurringDatesInMonth(t,y-1,mo-1).includes(ds));
+  // De-dup
+  const taskIds=new Set(deadlineTasks.map(t=>t.id));
+  const allTasks=[...deadlineTasks,...recurringTasks.filter(t=>!taskIds.has(t.id))];
+  const dateLabel=`${y} 年 ${mo} 月 ${d} 日`;
+  if(!allTasks.length){
+    el.innerHTML=`<div class="cal-day-detail"><div class="cal-day-detail-title">📅 ${dateLabel}</div><div style="color:var(--muted);font-size:13px">當天沒有任務</div></div>`;
+    el.style.display='';return;
+  }
+  el.innerHTML=`<div class="cal-day-detail">
+    <div class="cal-day-detail-title">📅 ${dateLabel} · ${allTasks.length} 個任務</div>
+    ${allTasks.map(t=>{
+      const aids=getAIds(t),ov=isOverdue(t);
+      const memberBadges=showMember?aids.map(aid=>{const m=mGet(aid),c=mColor(aid);return m?`<span class="badge" style="background:${c}20;color:${c}">${esc(m.name)}</span>`:''}).join(''):'';
+      const typeColor=t.type==='recurring'?'var(--teal)':ov?'var(--orange)':t.priority==='urgent'?'var(--red)':'var(--blue)';
+      const typeLabel=t.type==='recurring'?`<span class="badge" style="background:#14b8a620;color:var(--teal)">🔄 ${recurLabel(t)}</span>`:ov?`<span class="badge" style="background:#f9731620;color:var(--orange)">⚠️ 逾期</span>`:'';
+      return `<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border)">
+        <button onclick="toggleTask('${t.id}')" style="width:22px;height:22px;border-radius:50%;flex-shrink:0;border:2px solid ${t.completed?'var(--green)':typeColor};background:${t.completed?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;min-width:22px;margin-top:1px">${t.completed?'✓':''}</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px;text-decoration:${t.completed?'line-through':'none'};color:${t.completed?'var(--muted)':'var(--text)'};margin-bottom:5px">${esc(t.title)}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            ${memberBadges}
+            ${t.priority==='urgent'?`<span class="badge" style="background:#ef444420;color:#ef4444">🚨 緊急</span>`:''}
+            ${typeLabel}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+  el.style.display='';
+}
+
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}calSelDay=null;renderCalendar();document.getElementById('calDayDetail').style.display='none';}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}calSelDay=null;renderCalendar();document.getElementById('calDayDetail').style.display='none';}
+function mCalPrev(){mCalMonth--;if(mCalMonth<0){mCalMonth=11;mCalYear--;}mCalSelDay=null;renderMemberCalendar();document.getElementById('mCalDayDetail').style.display='none';}
+function mCalNext(){mCalMonth++;if(mCalMonth>11){mCalMonth=0;mCalYear++;}mCalSelDay=null;renderMemberCalendar();document.getElementById('mCalDayDetail').style.display='none';}
+
+// ══ TASKS CRUD ════════════════════════════════════════════════════════════════
+function toggleAddTask(){
+  const f=document.getElementById('addTaskForm'),btn=document.querySelector('#managerAddBtn button');
+  const show=f.style.display==='none';
+  f.style.display=show?'':'none';
+  btn.textContent=show?'✕ 取消':'＋ 新增任務';
+  btn.className=show?'btn btn-ghost btn-full':'btn btn-primary btn-full';
+  if(show) buildAssigneeCheckboxes('fAssigneeList',[]);
+}
+function buildAssigneeCheckboxes(containerId,selectedIds){
+  const wrap=document.getElementById(containerId);if(!wrap)return;
+  wrap.innerHTML=S.members.map((m,i)=>{
+    const c=MC[i%MC.length],checked=selectedIds&&selectedIds.includes(m.id);
+    return `<label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;border-radius:9px;border:1px solid ${checked?c:'var(--border)'};cursor:pointer;transition:all .15s;background:${checked?c+'20':'transparent'};text-align:center" id="albl_${containerId}_${m.id}" onclick="toggleAssignee('${containerId}','${m.id}','${c}')">
+      <span style="font-size:13px;font-weight:700;color:${checked?c:'var(--text)'}">${esc(m.name)}</span>
+    </label>`;
+  }).join('');
+}
+function toggleAssignee(containerId,id,color){
+  const lbl=document.getElementById(`albl_${containerId}_${id}`);if(!lbl)return;
+  const active=lbl.dataset.active==='1';
+  lbl.dataset.active=active?'0':'1';
+  lbl.style.borderColor=!active?color:'var(--border)';
+  lbl.style.background=!active?color+'20':'transparent';
+  lbl.querySelector('span').style.color=!active?color:'var(--text)';
+}
+function getSelectedFromContainer(containerId){
+  const wrap=document.getElementById(containerId);if(!wrap)return[];
+  return [...wrap.querySelectorAll('label[data-active="1"]')].map(l=>l.id.replace(`albl_${containerId}_`,''));
+}
+function toggleDeadlineField(){
+  const t=document.getElementById('fType').value;
+  document.getElementById('deadlineField').style.display=t==='deadline'?'':'none';
+  document.getElementById('recurField').style.display=t==='recurring'?'':'none';
+  if(t==='recurring')toggleRecurDay();
+}
+function toggleRecurDay(){
+  const r=document.getElementById('fRecur').value;
+  document.getElementById('recurDayWeekField').style.display=(r==='weekly'||r==='biweekly')?'':'none';
+  document.getElementById('recurDayMonthField').style.display=(r==='monthly'||r==='bimonthly')?'':'none';
+}
+function addTask(){
+  const title=document.getElementById('fTitle').value.trim();
+  const desc=document.getElementById('fDesc').value.trim();
+  const aids=getSelectedFromContainer('fAssigneeList');
+  const type=document.getElementById('fType').value;
+  if(!title){showToast('請填寫任務標題','error');return;}
+  if(!aids.length){showToast('請選擇至少一位負責人','error');return;}
+  const recur=document.getElementById('fRecur').value;
+  let recurDay=null;
+  if(type==='recurring'){
+    if(recur==='weekly'||recur==='biweekly') recurDay=parseInt(document.getElementById('fRecurDayWeek').value);
+    else if(recur==='monthly'||recur==='bimonthly') recurDay=parseInt(document.getElementById('fRecurDayMonth').value);
+  }
+  const recurStart=type==='recurring'?document.getElementById('fRecurStart').value||null:null;
+  const tags=parseTags(document.getElementById('fTags').value);
+  S.tasks.push({
+    id:'t'+Date.now(),title,description:desc||null,
+    assigneeIds:aids,
+    deadline:type==='deadline'?document.getElementById('fDeadline').value:null,
+    type, recurrence:type==='recurring'?recur:null,
+    recurrenceDay:recurDay, recurrenceStart:recurStart,
+    priority:document.getElementById('fPriority').value,
+    tags, comments:[],
+    completed:false, createdAt:new Date().toISOString()
+  });
+  markDirty();renderAll();toggleAddTask();
+  document.getElementById('fTitle').value='';document.getElementById('fDesc').value='';
+  document.getElementById('fTags').value='';document.getElementById('fTagsPreview').innerHTML='';
+  showToast('任務已新增 ✓');
+}
+function toggleTask(id){
+  const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;
+  // Change 4: auto-spawn next recurring occurrence when completed
+  if(t.completed&&t.type==='recurring'){
+    spawnNextRecurring(t);
+  }
+  markDirty();renderAll();
+  if(calSelDay)renderCalDayDetail(calSelDay);
+  if(mCalSelDay)renderMCalDayDetail(mCalSelDay);
+}
+
+function spawnNextRecurring(t){
+  // Calculate next occurrence date
+  const base=t.deadline?new Date(t.deadline+'T00:00:00'):new Date();
+  const next=new Date(base);
+  const r=t.recurrence||'monthly';
+  if(r==='weekly')  next.setDate(next.getDate()+7);
+  else if(r==='biweekly') next.setDate(next.getDate()+14);
+  else if(r==='monthly') next.setMonth(next.getMonth()+1);
+  else if(r==='bimonthly') next.setMonth(next.getMonth()+2);
+  else if(r==='quarterly') next.setMonth(next.getMonth()+3);
+  else if(r==='yearly') next.setFullYear(next.getFullYear()+1);
+  // If recurrenceDay set, snap to that day of month/week
+  if(t.recurrenceDay!=null&&(r==='monthly'||r==='bimonthly')){
+    next.setDate(Math.min(t.recurrenceDay,new Date(next.getFullYear(),next.getMonth()+1,0).getDate()));
+  }
+  const nextDs=next.toISOString().slice(0,10);
+  // Don't spawn if same deadline already exists as uncompleted
+  const exists=S.tasks.some(x=>x.id!==t.id&&getAIds(x).join(',')===(getAIds(t).join(','))&&x.title===t.title&&!x.completed&&x.deadline===nextDs);
+  if(exists)return;
+  S.tasks.push({
+    id:'t'+Date.now()+Math.random().toString(36).slice(2),
+    title:t.title, description:t.description||null,
+    assigneeIds:getAIds(t), type:'recurring',
+    recurrence:t.recurrence, recurrenceDay:t.recurrenceDay,
+    recurrenceStart:t.recurrenceStart,
+    deadline:nextDs, priority:t.priority,
+    completed:false, createdAt:new Date().toISOString(),
+    recurringParent:t.id,
+  });
+}
+function openDel(id){delId=id;document.getElementById('deleteModal').style.display='flex';}
+function closeDeleteModal(){delId=null;document.getElementById('deleteModal').style.display='none';}
+function confirmDelete(){S.tasks=S.tasks.filter(t=>t.id!==delId);markDirty();renderAll();closeDeleteModal();showToast('任務已刪除');}
+
+function openEditTaskModal(id){
+  const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  editId=id;
+  document.getElementById('eTTitle').value=t.title||'';
+  document.getElementById('eTDesc').value=t.description||'';
+  document.getElementById('eTType').value=t.type||'deadline';
+  document.getElementById('eTDeadline').value=t.deadline||'';
+  document.getElementById('eTRecur').value=t.recurrence||'weekly';
+  document.getElementById('eTRecurStart').value=t.recurrenceStart||'';
+  document.getElementById('eTPriority').value=t.priority||'normal';
+  // Set day fields
+  if(t.recurrenceDay!=null){
+    const r=t.recurrence||'';
+    if(r==='weekly'||r==='biweekly') document.getElementById('eTRecurDayWeek').value=t.recurrenceDay;
+    if(r==='monthly'||r==='bimonthly') document.getElementById('eTRecurDayMonth').value=t.recurrenceDay;
+  }
+  document.getElementById('eTTags').value=getTags(t).join(' ');
+  renderTagsPreview('eTTagsPreview',getTags(t));
+  buildAssigneeCheckboxes('eTAssigneeList',getAIds(t));
+  toggleEditFields();
+  document.getElementById('editTaskModal').style.display='flex';
+}
+function closeEditTaskModal(){editId=null;document.getElementById('editTaskModal').style.display='none';}
+function toggleEditFields(){
+  const t=document.getElementById('eTType').value;
+  document.getElementById('eTDeadlineField').style.display=t==='deadline'?'':'none';
+  document.getElementById('eTRecurField').style.display=t==='recurring'?'':'none';
+  if(t==='recurring')toggleEditRecurDay();
+}
+function toggleEditRecurDay(){
+  const r=document.getElementById('eTRecur').value;
+  document.getElementById('eTRecurDayWeekField').style.display=(r==='weekly'||r==='biweekly')?'':'none';
+  document.getElementById('eTRecurDayMonthField').style.display=(r==='monthly'||r==='bimonthly')?'':'none';
+}
+function saveTaskEdit(){
+  const t=S.tasks.find(t=>t.id===editId);if(!t)return;
+  const title=document.getElementById('eTTitle').value.trim();
+  const aids=getSelectedFromContainer('eTAssigneeList');
+  if(!title){showToast('請填寫任務標題','error');return;}
+  if(!aids.length){showToast('請選擇至少一位負責人','error');return;}
+  const type=document.getElementById('eTType').value;
+  const recur=document.getElementById('eTRecur').value;
+  let recurDay=null;
+  if(type==='recurring'){
+    if(recur==='weekly'||recur==='biweekly') recurDay=parseInt(document.getElementById('eTRecurDayWeek').value);
+    else if(recur==='monthly'||recur==='bimonthly') recurDay=parseInt(document.getElementById('eTRecurDayMonth').value);
+  }
+  t.title=title;
+  t.description=document.getElementById('eTDesc').value.trim()||null;
+  t.assigneeIds=aids;delete t.assigneeId;
+  t.type=type;
+  t.deadline=type==='deadline'?document.getElementById('eTDeadline').value:null;
+  t.recurrence=type==='recurring'?recur:null;
+  t.recurrenceDay=recurDay;
+  t.recurrenceStart=type==='recurring'?document.getElementById('eTRecurStart').value||null:null;
+  t.priority=document.getElementById('eTPriority').value;
+  t.tags=parseTags(document.getElementById('eTTags').value);
+  markDirty();renderAll();closeEditTaskModal();showToast('任務已更新 ✓');
+}
+function addMember(){
+  const n=document.getElementById('newName').value.trim();if(!n){showToast('請填寫姓名','error');return;}
+  S.members.push({id:'m'+Date.now(),name:n,wxpUid:document.getElementById('newWxpUid').value.trim(),wechatId:document.getElementById('newWechatId').value.trim(),dept:document.getElementById('newDept').value.trim()});
+  markDirty();renderAll();['newName','newWxpUid','newWechatId','newDept'].forEach(id=>document.getElementById(id).value='');showToast('成員已新增 ✓');
+}
+function delMember(id){
+  if(!confirm('確定要刪除此成員嗎？'))return;
+  S.members=S.members.filter(m=>m.id!==id);
+  markDirty();renderAll();showToast('成員已刪除');
+}
+function openMemberModal(id){
+  editId=id;const m=S.members.find(m=>m.id===id);if(!m)return;
+  document.getElementById('editName').value=m.name||'';document.getElementById('editWxpUid').value=m.wxpUid||'';
+  document.getElementById('editWechatId').value=m.wechatId||'';document.getElementById('editDept').value=m.dept||'';
+  document.getElementById('memberModal').style.display='flex';
+}
+function closeMemberModal(){editId=null;document.getElementById('memberModal').style.display='none';}
+function saveMemberEdit(){
+  const m=S.members.find(m=>m.id===editId);if(!m)return;
+  m.name=document.getElementById('editName').value.trim()||m.name;
+  m.wxpUid=document.getElementById('editWxpUid').value.trim();
+  m.wechatId=document.getElementById('editWechatId').value.trim();
+  m.dept=document.getElementById('editDept').value.trim();
+  // Update identity name if editing self
+  if(S.identity.memberId===m.id)S.identity.name=m.name;
+  markDirty();renderAll();closeMemberModal();showToast('成員資料已更新 ✓');
+}
+function quickReminder(id){
+  ['reminderTarget','sideReminderTarget'].forEach(sid=>{const e=document.getElementById(sid);if(e)e.value=id;});
+  updateReminderPreview();updateSidePreview();
+  switchTab('reminders');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-reminders');if(nb)nb.classList.add('active');
+}
+
+// ══ AI SCAN ═══════════════════════════════════════════════════════════════════
+async function scanMeeting(){
+  const text=document.getElementById('meetingText').value.trim();
+  const apiKey=document.getElementById('aiApiKey').value.trim();
+  const provider=localStorage.getItem('tl_aiProvider')||'gemini';
+  if(!text){showToast('請填入會議記錄','error');return;}
+  if(!apiKey){showToast(`請填入 ${provider==='gemini'?'Gemini':'Anthropic'} API Key`,'error');return;}
+  const btn=document.getElementById('scanBtn');btn.textContent='🔍 AI 分析中...';btn.disabled=true;
+  const prompt=`從以下會議記錄中提取所有行動項目。只返回純 JSON 陣列（不要 markdown、不要反引號、不要解釋）。每個物件包含：title（繁體中文任務標題），assignee（負責人姓名或"未指定"），deadline（"YYYY-MM-DD"或null），priority（"urgent"或"normal"），type（"deadline"或"recurring"），recurrence（null/"weekly"/"monthly"/"quarterly"/"yearly"）。\n\n會議記錄：\n${text}`;
+  try{
+    let raw='';
+    if(provider==='gemini'){
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.1}})
+      });
+      const d=await res.json();
+      if(d.error){showToast(`Gemini 錯誤：${d.error.message}`,'error');btn.textContent='🔍 一鍵 AI 掃描';btn.disabled=false;return;}
+      raw=d.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+    } else {
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,
+          system:'Extract action items from meeting minutes. Return ONLY a raw JSON array (no markdown). Each object: title (Traditional Chinese), assignee (name or "未指定"), deadline ("YYYY-MM-DD" or null), priority ("urgent"/"normal"), type ("deadline"/"recurring"), recurrence (null/"weekly"/"monthly"/"quarterly"/"yearly").',
+          messages:[{role:'user',content:text}]})
+      });
+      const d=await res.json();
+      raw=d.content?.[0]?.text||'[]';
+    }
+    scanned=JSON.parse(raw.replace(/```json|```/g,'').trim()).map((t,i)=>({...t,tempId:i,selected:true}));
+    renderScanned();
+    if(!scanned.length)showToast('未發現任何行動項目','warn');
+    else showToast(`✓ 發現 ${scanned.length} 個行動項目`);
+  }catch(e){showToast('掃描失敗：'+e.message,'error');}
+  btn.textContent='🔍 一鍵 AI 掃描';btn.disabled=false;
+}
+function renderScanned(){
+  const w=document.getElementById('scannedList'),items=document.getElementById('scannedItems');
+  if(!scanned.length){w.style.display='none';return;}
+  w.style.display='';
+  document.getElementById('scannedCount').textContent=`已選 ${scanned.filter(t=>t.selected).length} / ${scanned.length} 個`;
+  items.innerHTML=scanned.map((t,i)=>`
+  <div style="background:var(--input-bg);border-radius:9px;padding:11px;margin-bottom:7px;display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border)">
+    <input type="checkbox" ${t.selected?'checked':''} onchange="toggleScan(${i})" style="margin-top:3px;accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;cursor:pointer">
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:13px;margin-bottom:6px;line-height:1.4">${esc(t.title)}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--muted)">👤 ${esc(t.assignee||'未指定')}</span>
+        ${t.deadline?`<span style="font-size:11px;color:var(--blue)">📅 ${t.deadline}</span>`:''}
+        ${t.priority==='urgent'?`<span style="font-size:11px;color:var(--red);font-weight:700">🚨 緊急</span>`:''}
+        ${t.type==='recurring'&&t.recurrence?`<span style="font-size:11px;color:var(--green)">🔄 ${RL[t.recurrence]||t.recurrence}</span>`:''}
+      </div>
+    </div>
+  </div>`).join('');
+}
+function toggleScan(i){scanned[i].selected=!scanned[i].selected;renderScanned();}
+function confirmScanned(){
+  const sel=scanned.filter(t=>t.selected);if(!sel.length)return;
+  sel.forEach(t=>{
+    const m=S.members.find(m=>m.name.includes(t.assignee||'')||(t.assignee||'').includes(m.name));
+    S.tasks.push({id:'t'+Date.now()+Math.random().toString(36).slice(2),title:t.title,assigneeIds:m?[m.id]:[],deadline:t.deadline,type:t.type||'deadline',recurrence:t.recurrence,priority:t.priority||'normal',completed:false,createdAt:new Date().toISOString(),source:'ai'});
+  });
+  markDirty();renderAll();scanned=[];document.getElementById('scannedList').style.display='none';
+  document.getElementById('meetingText').value='';showToast(`✓ 已新增 ${sel.length} 個任務`);switchTab('tasks');
+}
+function clearScanned(){scanned=[];document.getElementById('scannedList').style.display='none';}
+
+// ══ REMINDERS ═════════════════════════════════════════════════════════════════
+function buildMsg(target,note){
+  const today=new Date().toLocaleDateString('zh-TW');
+  const lines=[`【Task List 任務提醒】 ${today}\n`];
+  const tgts=target==='all'?S.members:S.members.filter(m=>m.id===target);
+  for(const m of tgts){
+    const mt=S.tasks.filter(t=>getAIds(t).includes(m.id)&&!t.completed);if(!mt.length)continue;
+    const urg=mt.filter(t=>t.priority==='urgent').length,ovd=mt.filter(t=>isOverdue(t)).length;
+    lines.push(`👤 ${m.name}（${mt.length} 項待辦${urg?`・${urg} 緊急`:''}${ovd?`・${ovd} 逾期`:''}）`);
+    mt.slice(0,5).forEach((t,i)=>{
+      const sf=t.deadline?` [截止 ${t.deadline}]`:t.recurrence?` [${recurLabel(t)}]`:'';
+      lines.push(`  ${i+1}. ${t.title}${sf}${isOverdue(t)?' ⚠️':''}`);
+    });
+    if(mt.length>5)lines.push(`  ...及其他 ${mt.length-5} 個任務`);
+    lines.push('');
+  }
+  if(note)lines.push(`📌 備注：${note}`);
+  lines.push('請及時更新進度，謝謝合作！');
+  return lines.join('\n');
+}
+function updateReminderPreview(){
+  const t=document.getElementById('reminderTarget')?.value||'all';
+  const n=document.getElementById('reminderNote')?.value||'';
+  const el=document.getElementById('reminderPreview');if(el)el.textContent=buildMsg(t,n);
+}
+function updateSidePreview(){
+  const t=document.getElementById('sideReminderTarget')?.value||'all';
+  const n=document.getElementById('sideReminderNote')?.value||'';
+  const el=document.getElementById('sidePreview');if(el)el.textContent=buildMsg(t,n);
+}
+async function doSend(target,content){
+  if(!S.wxp.appToken){showToast('請先設定 WxPusher AppToken','error');return false;}
+  const tgts=target==='all'?S.members:S.members.filter(m=>m.id===target);
+  const uids=tgts.map(m=>m.wxpUid).filter(Boolean);
+  if(!uids.length){showToast('所選成員尚未設定 WxPusher UID，請到成員頁面填入 UID','warn');return false;}
+  try{
+    const res=await fetch('https://wxpusher.zjiecode.com/api/send/message',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({appToken:S.wxp.appToken,content,contentType:1,uids})
+    });
+    const data=await res.json();
+    if(data.code===1000){showToast(`✓ 已發送至 ${uids.length} 位成員`);return true;}
+    showToast(`WxPusher 錯誤 ${data.code}：${data.msg}`,'warn');return false;
+  }catch(e){showToast('發送失敗：'+e.message,'error');return false;}
+}
+async function testWxPusher(){
+  if(!S.wxp.appToken){showToast('請先填入 AppToken','error');return;}
+  // Use current user's UID if available, else all UIDs
+  const m=S.members.find(m=>m.id===myId());
+  const uid=m?.wxpUid||(S.members.find(x=>x.wxpUid)?.wxpUid)||null;
+  if(!uid){showToast('請先在成員資料填入你的 WxPusher UID','warn');return;}
+  try{
+    const res=await fetch('https://wxpusher.zjiecode.com/api/send/message',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({appToken:S.wxp.appToken,content:'✅ Task List 推送測試成功！你的微信通知已正常連接。',contentType:1,uids:[uid]})
+    });
+    const data=await res.json();
+    if(data.code===1000)showToast('✓ 測試成功，請查看微信');
+    else showToast(`測試失敗 (${data.code})：${data.msg}`,'warn');
+  }catch(e){showToast('測試失敗：'+e.message,'error');}
+}
+async function sendReminder(){
+  const btn=document.getElementById('sendBtn');btn.textContent='發送中...';btn.disabled=true;
+  await doSend(document.getElementById('reminderTarget').value,document.getElementById('reminderPreview').textContent);
+  btn.textContent='📤 發送至微信';btn.disabled=false;
+}
+async function sendSideReminder(){await doSend(document.getElementById('sideReminderTarget').value,document.getElementById('sidePreview').textContent);}
+
+// ══ UTILS ═════════════════════════════════════════════════════════════════════
+function fillSettingsUI(){
+  document.getElementById('giteeOwner').value=S.gitee.owner||'';
+  document.getElementById('giteeRepo').value =S.gitee.repo ||'';
+  document.getElementById('giteeToken').value=S.gitee.token||'';
+  document.getElementById('wxpToken').value  =S.wxp.appToken||'';
+}
+function showToast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.background=type==='error'?'#ef4444':type==='warn'?'#f97316':'#22c55e';
+  el.style.display='block';setTimeout(()=>el.style.display='none',3500);
+}
+
+// ══ FEATURE 1: AUTO DAILY REMINDER ═══════════════════════════════════════════
+function fillAutoReminderUI(){
+  const ar=S.autoReminder||{};
+  const sel=document.getElementById('autoReminderTime');
+  if(sel&&ar.hour!=null)sel.value=ar.hour;
+  const tsel=document.getElementById('autoReminderTarget');
+  if(tsel){
+    const opts='<option value="all">全部成員</option>'+S.members.map(m=>`<option value="${m.id}"${m.id===ar.target?' selected':''}>${esc(m.name)}</option>`).join('');
+    tsel.innerHTML=opts;
+  }
+  updateAutoReminderUI();
+}
+function updateAutoReminderUI(){
+  const enabled=S.autoReminder?.enabled;
+  const hour=S.autoReminder?.hour||9;
+  const statusEl=document.getElementById('autoReminderStatus');
+  const toggleBtn=document.getElementById('autoReminderToggle');
+  if(!statusEl||!toggleBtn)return;
+  if(enabled){
+    statusEl.textContent=`已啟用 — 每天 ${hour}:00 自動發送`;
+    statusEl.style.color='var(--green)';
+    toggleBtn.textContent='停用';
+    toggleBtn.style.borderColor='var(--red)';
+    toggleBtn.style.color='var(--red)';
+    toggleBtn.style.background='#ef444410';
+  } else {
+    statusEl.textContent='已停用';
+    statusEl.style.color='var(--muted)';
+    toggleBtn.textContent='啟用';
+    toggleBtn.style.borderColor='var(--border)';
+    toggleBtn.style.color='var(--muted)';
+    toggleBtn.style.background='transparent';
+  }
+}
+function toggleAutoReminder(){
+  S.autoReminder.hour=parseInt(document.getElementById('autoReminderTime').value)||9;
+  S.autoReminder.target=document.getElementById('autoReminderTarget').value||'all';
+  S.autoReminder.enabled=!S.autoReminder.enabled;
+  saveLocal();updateAutoReminderUI();
+  if(S.autoReminder.enabled){
+    showToast(`✓ 每日 ${S.autoReminder.hour}:00 自動提醒已啟用`);
+    startAutoReminderScheduler();
+  } else {
+    showToast('自動提醒已停用');
+    if(autoReminderTmr)clearInterval(autoReminderTmr);
+  }
+}
+function startAutoReminderScheduler(){
+  if(autoReminderTmr)clearInterval(autoReminderTmr);
+  // Check every minute
+  autoReminderTmr=setInterval(checkAutoReminder,60000);
+  checkAutoReminder(); // check immediately on start
+}
+async function checkAutoReminder(){
+  if(!S.autoReminder?.enabled||!S.wxp.appToken)return;
+  const now=new Date();
+  const hour=now.getHours(),min=now.getMinutes();
+  const targetHour=S.autoReminder.hour||9;
+  if(hour!==targetHour||min>2)return; // only fires in first 2 mins of the hour
+  // Check if already sent today
+  const todayKey=`tl_autoSent_${now.toDateString()}`;
+  if(localStorage.getItem(todayKey))return;
+  localStorage.setItem(todayKey,'1');
+  // Build and send today's reminder
+  const todayDs=now.toISOString().slice(0,10);
+  const target=S.autoReminder.target||'all';
+  const tgts=target==='all'?S.members:S.members.filter(m=>m.id===target);
+  const lines=[`【Task List 每日提醒】 ${now.toLocaleDateString('zh-TW')}\n`];
+  let hasContent=false;
+  for(const m of tgts){
+    const todayTasks=S.tasks.filter(t=>getAIds(t).includes(m.id)&&!t.completed&&(t.deadline===todayDs||isOverdue(t)));
+    if(!todayTasks.length)continue;
+    hasContent=true;
+    const ovd=todayTasks.filter(t=>isOverdue(t)).length;
+    lines.push(`👤 ${m.name}（${todayTasks.length} 項${ovd?`，${ovd} 逾期`:''}）`);
+    todayTasks.slice(0,5).forEach((t,i)=>{
+      lines.push(`  ${i+1}. ${t.title}${isOverdue(t)?' ⚠️':''}`);
+    });
+    lines.push('');
+  }
+  if(!hasContent)return; // nothing due today, skip
+  lines.push('請及時更新進度，謝謝！');
+  const content=lines.join('\n');
+  const uids=tgts.map(m=>m.wxpUid).filter(Boolean);
+  if(!uids.length)return;
+  try{
+    await fetch('https://wxpusher.zjiecode.com/api/send/message',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({appToken:S.wxp.appToken,content,contentType:1,uids})
+    });
+    showToast(`⏰ 每日提醒已自動發送`);
+  }catch(e){}
+}
+async function sendTodayReminder(){
+  const now=new Date();
+  const todayDs=now.toISOString().slice(0,10);
+  const scope=isMgr()?S.tasks:getMyTasks();
+  const todayTasks=scope.filter(t=>!t.completed&&(t.deadline===todayDs||isOverdue(t)));
+  if(!todayTasks.length){showToast('今日沒有到期任務','warn');return;}
+  const lines=[`【Task List 今日提醒】 ${now.toLocaleDateString('zh-TW')}\n`];
+  const tgts=isMgr()?S.members:S.members.filter(m=>m.id===myId());
+  for(const m of tgts){
+    const mt=todayTasks.filter(t=>getAIds(t).includes(m.id));
+    if(!mt.length)continue;
+    lines.push(`👤 ${m.name}（${mt.length} 項）`);
+    mt.forEach((t,i)=>lines.push(`  ${i+1}. ${t.title}${isOverdue(t)?' ⚠️逾期':''}`));
+    lines.push('');
+  }
+  lines.push('請及時完成，謝謝！');
+  const uids=tgts.map(m=>m.wxpUid).filter(Boolean);
+  if(!S.wxp.appToken||!uids.length){showToast('請設定 AppToken 及成員 UID','warn');return;}
+  await doSend(isMgr()?'all':myId(),lines.join('\n'));
+}
+
+// ══ FEATURE 2: COMMENTS / PROGRESS ═══════════════════════════════════════════
+function openCommentModal(taskId){
+  commentTaskId=taskId;
+  const t=S.tasks.find(t=>t.id===taskId);if(!t)return;
+  document.getElementById('commentTaskTitle').textContent=t.title;
+  document.getElementById('commentText').value='';
+  document.getElementById('progressSlider').value=t.progress||0;
+  document.getElementById('progressDisplay').textContent=(t.progress||0)+'%';
+  renderExistingComments(t);
+  document.getElementById('commentModal').style.display='flex';
+}
+function closeCommentModal(){commentTaskId=null;document.getElementById('commentModal').style.display='none';}
+function setQuickStatus(status){
+  document.getElementById('commentText').value=status;
+}
+function renderExistingComments(t){
+  const el=document.getElementById('existingComments');
+  const comments=t.comments||[];
+  if(!comments.length){el.innerHTML=`<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px">暫無備注</div>`;return;}
+  el.innerHTML=comments.slice().reverse().map(c=>{
+    const m=mGet(c.authorId);
+    const color=m?mColor(c.authorId):'var(--muted)';
+    const pBadge=c.progress!=null?`<span style="font-size:10px;background:var(--blue)20;color:var(--blue);padding:1px 7px;border-radius:10px;font-weight:700">${c.progress}%</span>`:'';
+    return `<div class="comment-item">
+      <div class="comment-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-weight:700;color:${color}">${esc(c.author||'未知')}</span>
+        ${pBadge}
+        <span style="margin-left:auto">${new Date(c.ts).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <div class="comment-text">${esc(c.text)}</div>
+    </div>`;
+  }).join('');
+}
+function saveComment(){
+  const text=document.getElementById('commentText').value.trim();
+  if(!text){showToast('請輸入備注內容','error');return;}
+  const t=S.tasks.find(t=>t.id===commentTaskId);if(!t)return;
+  if(!t.comments)t.comments=[];
+  const progress=parseInt(document.getElementById('progressSlider').value)||0;
+  const m=mGet(myId());
+  t.comments.push({
+    id:'c'+Date.now(),text,
+    authorId:myId(),author:m?.name||S.identity.name||'未知',
+    progress,ts:new Date().toISOString()
+  });
+  t.progress=progress;
+  markDirty();renderAll();
+  renderExistingComments(t);
+  document.getElementById('commentText').value='';
+  showToast('備注已提交 ✓');
+}
+
+// ══ FEATURE 3: TODAY VIEW ════════════════════════════════════════════════════
+function renderToday(){
+  const el=document.getElementById('todayContent');if(!el)return;
+  const now=new Date();
+  const todayDs=now.toISOString().slice(0,10);
+  const dow=['日','一','二','三','四','五','六'][now.getDay()];
+  const label=document.getElementById('todayDateLabel');
+  const greet=document.getElementById('todayGreeting');
+  if(label)label.textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（星期${dow}）`;
+  const h=now.getHours();
+  if(greet)greet.textContent=h<12?'早上好 ☀️':h<18?'下午好 🌤️':'晚上好 🌙';
+
+  const scope=isMgr()?S.tasks:getMyTasks();
+  // Overdue
+  const overdueTasks=scope.filter(t=>isOverdue(t)&&!t.completed);
+  // Due today
+  const dueTodayTasks=scope.filter(t=>t.deadline===todayDs&&!t.completed&&!isOverdue(t));
+  // Due in 3 days (not today, not overdue)
+  const upcomingTasks=scope.filter(t=>t.deadline&&!t.completed&&!isOverdue(t)&&t.deadline!==todayDs&&isDueSoon(t));
+  // Recurring active today
+  const recurTasks=scope.filter(t=>t.type==='recurring'&&!t.completed&&
+    getRecurringDatesInMonth(t,now.getFullYear(),now.getMonth()).includes(todayDs));
+
+  function makeTaskItem(t,highlight){
+    const aids=getAIds(t);
+    const names=isMgr()?aids.map(id=>mGet(id)?.name).filter(Boolean).join('、'):'';
+    const comments=t.comments||[];
+    const progress=t.progress||0;
+    const pBar=progress>0?`<div class="progress-bar-outer" style="margin-top:4px"><div class="progress-bar-inner" style="width:${progress}%;background:${progress===100?'var(--green)':progress>=50?'var(--blue)':'var(--orange)'}"></div></div>`:'';
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--card2);border:1px solid ${highlight||'var(--border)'};margin-bottom:7px">
+      <button onclick="toggleTask('${t.id}')" style="width:22px;height:22px;border-radius:50%;flex-shrink:0;border:2px solid ${t.completed?'var(--green)':highlight||'var(--border)'};background:${t.completed?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;min-width:22px">${t.completed?'✓':''}</button>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;line-height:1.4">${esc(t.title)}</div>
+        ${names?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(names)}</div>`:''}
+        ${pBar}
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="openCommentModal('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:15px;padding:2px;min-height:30px" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--muted)'">💬</button>
+      </div>
+    </div>`;
+  }
+
+  let html='';
+  if(overdueTasks.length){
+    html+=`<div class="today-section"><div class="today-section-title"><span style="color:var(--red)">⚠️</span> 逾期未完成 (${overdueTasks.length})</div>`;
+    html+=overdueTasks.map(t=>makeTaskItem(t,'#ef444440')).join('');
+    html+=`</div>`;
+  }
+  if(dueTodayTasks.length){
+    html+=`<div class="today-section"><div class="today-section-title"><span style="color:var(--blue)">📅</span> 今日到期 (${dueTodayTasks.length})</div>`;
+    html+=dueTodayTasks.map(t=>makeTaskItem(t,'#3b82f640')).join('');
+    html+=`</div>`;
+  }
+  if(recurTasks.length){
+    html+=`<div class="today-section"><div class="today-section-title"><span style="color:var(--teal)">🔄</span> 今日例行 (${recurTasks.length})</div>`;
+    html+=recurTasks.map(t=>makeTaskItem(t,'#14b8a640')).join('');
+    html+=`</div>`;
+  }
+  if(upcomingTasks.length){
+    html+=`<div class="today-section"><div class="today-section-title"><span style="color:var(--orange)">⏰</span> 即將到期 (${upcomingTasks.length})</div>`;
+    html+=upcomingTasks.map(t=>makeTaskItem(t,'#f9731630')).join('');
+    html+=`</div>`;
+  }
+  if(!html){
+    html=`<div style="text-align:center;padding:60px 20px">
+      <div style="font-size:48px;margin-bottom:14px">🎉</div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:6px">今日沒有待辦任務</div>
+      <div style="color:var(--muted);font-size:13px">保持這個節奏！</div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ══ FEATURE 4: TAGS ══════════════════════════════════════════════════════════
+function parseTags(str){return (str||'').trim().split(/\s+/).filter(Boolean).map(t=>t.replace(/^#+/,''));}
+function renderTagsPreview(containerId,tags){
+  const el=document.getElementById(containerId);if(!el)return;
+  el.innerHTML=tags.map(tag=>`<span class="tag-pill" style="background:${tagColor(tag)}18;color:${tagColor(tag)};border:1px solid ${tagColor(tag)}40">#${esc(tag)}</span>`).join('');
+}
+function filterByTag(tag){
+  F.tag=F.tag===tag?'':tag;
+  // Switch to tasks view
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-tasks')?.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-tasks')?.classList.add('active');
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.dtab')[1]?.classList.add('active'); // tasks is index 1
+  renderTasks();
+  if(F.tag)showToast(`篩選標籤：#${F.tag}`);
+}
+// Live preview tags while typing
+document.addEventListener('input',e=>{
+  if(e.target.id==='fTags')renderTagsPreview('fTagsPreview',parseTags(e.target.value));
+  if(e.target.id==='eTTags')renderTagsPreview('eTTagsPreview',parseTags(e.target.value));
+});
+
+// ══ FEATURE 5: THEME ═════════════════════════════════════════════════════════
+function applyTheme(){
+  const isLight=S.theme==='light';
+  document.body.classList.toggle('light',isLight);
+  const btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=isLight?'🌙':'☀️';
+  // Update meta theme-color
+  const tc=document.querySelector('meta[name="theme-color"]');
+  if(tc)tc.content=isLight?'#f0f4f8':'#07090f';
+}
+function toggleTheme(){
+  S.theme=S.theme==='dark'?'light':'dark';
+  applyTheme();saveLocal();
+  showToast(S.theme==='light'?'已切換為淺色模式 ☀️':'已切換為深色模式 🌙');
+}
+</script>
+</body>
+</html>
