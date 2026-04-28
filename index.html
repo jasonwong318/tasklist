@@ -63,6 +63,16 @@ body.light .dtab{color:#7a94ae !important}
 body.light .dtab.active{background:var(--blue) !important;color:#fff !important}
 body.light mark{background:#fde68a80 !important;color:#92400e !important}
 body.light .progress-bar-outer{background:#e2e8f0 !important}
+/* ── New feature styles ── */
+.subtask-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+.subtask-row+.subtask-row{border-top:1px solid var(--border)}
+.subtask-cb{width:18px;height:18px;min-width:18px;border-radius:50%;border:2px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:#fff;transition:all .15s;padding:0}
+.subtask-cb.done{background:var(--green);border-color:var(--green)}
+.activity-row{display:flex;gap:7px;align-items:flex-start;padding:5px 0;font-size:11px;color:var(--muted);line-height:1.5}
+.activity-row+.activity-row{border-top:1px solid var(--border)}
+.blocked-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#ef444415;color:#ef4444;border:1px solid #ef444430}
+.task-card.high-card{border-color:#f9731625!important}
+body.light .blocked-badge{background:#fee2e2;border-color:#fca5a5}
 body,body *{transition:background-color .2s,border-color .2s,color .15s}
 body button,body a{transition:opacity .15s,transform .12s,background-color .2s,border-color .15s,color .15s}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -286,14 +296,27 @@ button:active{transform:scale(0.96)}
       <div class="field"><span class="label">開始日期（選填）</span><input id="eTRecurStart" type="date" style="cursor:pointer"></div>
     </div>
     <div class="field"><span class="label">優先級</span>
-      <select id="eTPriority"><option value="normal">一般</option><option value="urgent">🚨 緊急</option></select></div>
+      <select id="eTPriority"><option value="low">⬇️ 低</option><option value="normal">一般</option><option value="high">⬆️ 高</option><option value="urgent">🚨 緊急</option></select></div>
     <div class="field">
       <span class="label">標籤（空格分隔）</span>
       <input id="eTTags" placeholder="例如：財務 合規 Q1">
       <div id="eTTagsPreview" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"></div>
     </div>
+    <div class="field">
+      <span class="label">子任務</span>
+      <div id="eTSubtaskList" style="margin-bottom:6px"></div>
+      <div style="display:flex;gap:6px">
+        <input id="eTSubtaskInput" placeholder="輸入子任務標題..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtaskToForm('eT');}">
+        <button type="button" onclick="addSubtaskToForm('eT')" class="btn btn-ghost btn-sm" style="white-space:nowrap;flex-shrink:0">＋</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">前置任務（完成後才能進行此任務）</span>
+      <div id="eTBlockedByList" style="max-height:130px;overflow-y:auto;border:1px solid var(--border);border-radius:9px;padding:8px;background:var(--input-bg);font-size:12px"></div>
+    </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-ghost btn-full" onclick="closeEditTaskModal()">取消</button>
+      <button class="btn btn-ghost btn-sm" style="white-space:nowrap;flex-shrink:0;border-color:#a855f750;color:#a855f7" onclick="saveAsTemplate()">📑 另存模板</button>
       <button class="btn btn-primary btn-full" onclick="saveTaskEdit()">儲存修改</button>
     </div>
   </div>
@@ -333,7 +356,11 @@ button:active{transform:scale(0.96)}
       <textarea id="commentText" rows="3" style="resize:none" placeholder="輸入進度更新或備注..."></textarea>
     </div>
     <!-- Existing comments -->
-    <div id="existingComments" style="max-height:200px;overflow-y:auto;margin-bottom:12px"></div>
+    <div id="existingComments" style="max-height:180px;overflow-y:auto;margin-bottom:8px"></div>
+    <details style="margin-bottom:12px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:5px 0;font-weight:700;user-select:none">📜 活動記錄</summary>
+      <div id="activityLogList" style="margin-top:8px;max-height:180px;overflow-y:auto;padding:2px 0"></div>
+    </details>
     <div style="display:flex;gap:9px">
       <button class="btn btn-ghost btn-full" onclick="closeCommentModal()">關閉</button>
       <button class="btn btn-primary btn-full" onclick="saveComment()">提交備注</button>
@@ -475,6 +502,7 @@ button:active{transform:scale(0.96)}
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px" id="statusFilters">
             <button class="chip active" onclick="setFilter('status','all',this)">全部</button>
             <button class="chip" onclick="setFilter('status','pending',this)">待辦</button>
+            <button class="chip" onclick="setFilter('status','high',this)">⬆️ 高優先</button>
             <button class="chip" onclick="setFilter('status','urgent',this)">🚨 緊急</button>
             <button class="chip" onclick="setFilter('status','overdue',this)">⚠️ 逾期</button>
             <button class="chip" onclick="setFilter('status','completed',this)">已完成</button>
@@ -492,6 +520,10 @@ button:active{transform:scale(0.96)}
           <div id="addTaskForm" style="display:none;margin-bottom:14px">
             <div class="card2" style="border-color:#3b82f640">
               <div style="font-weight:800;font-size:13px;color:var(--blue);margin-bottom:14px">新增任務</div>
+              <div class="field" id="fTemplateField">
+                <span class="label">從模板建立（選填）</span>
+                <select id="fTemplate" onchange="applyTemplate()"><option value="">— 不使用模板 —</option></select>
+              </div>
               <div class="field"><span class="label">任務標題 *</span><input id="fTitle" placeholder="輸入任務標題..."></div>
               <div class="field"><span class="label">描述（選填）</span><textarea id="fDesc" rows="2" style="min-height:auto;padding:9px 12px;resize:none" placeholder="補充說明、注意事項..."></textarea></div>
               <div class="field">
@@ -535,11 +567,19 @@ button:active{transform:scale(0.96)}
                 </div>
               </div>
               <div class="field"><span class="label">優先級</span>
-                <select id="fPriority"><option value="normal">一般</option><option value="urgent">🚨 緊急</option></select></div>
+                <select id="fPriority"><option value="low">⬇️ 低</option><option value="normal" selected>一般</option><option value="high">⬆️ 高</option><option value="urgent">🚨 緊急</option></select></div>
               <div class="field">
                 <span class="label">標籤（選填，空格分隔）</span>
                 <input id="fTags" placeholder="例如：財務 合規 Q1 重要">
                 <div id="fTagsPreview" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"></div>
+              </div>
+              <div class="field">
+                <span class="label">子任務（選填）</span>
+                <div id="fSubtaskList" style="margin-bottom:6px"></div>
+                <div style="display:flex;gap:6px">
+                  <input id="fSubtaskInput" placeholder="輸入子任務標題..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtaskToForm('f');}">
+                  <button type="button" onclick="addSubtaskToForm('f')" class="btn btn-ghost btn-sm" style="white-space:nowrap;flex-shrink:0">＋</button>
+                </div>
               </div>
               <button class="btn btn-success btn-full" onclick="addTask()">確認新增</button>
             </div>
@@ -741,6 +781,13 @@ button:active{transform:scale(0.96)}
           </div>
         </div>
 
+        <div class="card" id="templateCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">📑</span> 任務模板</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">儲存常用任務結構為模板，新增任務時一鍵套用</div>
+          <div id="templateList" style="margin-bottom:8px"></div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">💡 在任務編輯頁面點「📑 另存模板」即可新增模板</div>
+        </div>
+
         <div class="card" id="aboutCard">
           <div style="font-weight:700;margin-bottom:9px">ℹ️ 關於</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.9">
@@ -804,9 +851,11 @@ let S={
   autoReminder:{enabled:false,hour:9,target:'all'},
   theme:'dark',
   lastSha:'',
+  templates:[],
 };
 let F={status:'all',type:'all',member:'all',tag:''};
 let delId=null,editId=null,commentTaskId=null,scanned=[],dirty=false,syncTmr=null,autoReminderTmr=null;
+let formSubtasksAdd=[],formSubtasksEdit=[];
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 let calSelDay=null;
 let mCalYear=new Date().getFullYear(),mCalMonth=new Date().getMonth();
@@ -898,13 +947,24 @@ function loadLocal(){
     }
     if(!S.members||!S.members.length) seed();
     if(!S.identity)S.identity={role:'',memberId:'',name:''};
+    if(!S.templates)S.templates=[];
+    migrateTaskFields();
   }catch(e){seed();}
+}
+function migrateTaskFields(){
+  S.tasks.forEach(t=>{
+    if(!t.subtasks)t.subtasks=[];
+    if(!t.blockedBy)t.blockedBy=[];
+    if(!t.activityLog)t.activityLog=[];
+    if(!t.comments)t.comments=[];
+    if(t.progress==null)t.progress=0;
+  });
 }
 function saveLocal(){
   localStorage.setItem('tl_state',JSON.stringify({
     tasks:S.tasks,members:S.members,gitee:S.gitee,wxp:S.wxp,
     identity:S.identity,lastSha:S.lastSha,lastRemoteTs:S.lastRemoteTs,
-    autoReminder:S.autoReminder,theme:S.theme,
+    autoReminder:S.autoReminder,theme:S.theme,templates:S.templates,
   }));
 }
 function saveAiKey(){localStorage.setItem('tl_aiKey',document.getElementById('aiApiKey').value);}
@@ -1097,6 +1157,7 @@ function renderAll(){
   renderTasks();
   renderMembers();
   fillReminderSels();
+  renderTemplates();
   renderSideMembers();
   updateMemberFilter();
   updateRoleUI();
@@ -1234,6 +1295,7 @@ function getFiltered(){
     if(s==='completed'&&!t.completed)return false;
     if(s==='pending'&&t.completed)return false;
     if(s==='urgent'&&(t.priority!=='urgent'||t.completed))return false;
+    if(s==='high'&&(t.priority!=='high'||t.completed))return false;
     if(s==='overdue'&&!isOverdue(t))return false;
     if(F.type!=='all'&&t.type!==F.type)return false;
     if(F.member!=='all'&&!aids.includes(F.member))return false;
@@ -1264,20 +1326,21 @@ function renderTasks(){
   const list=document.getElementById('taskList'),fil=getFiltered();
   if(!fil.length){list.innerHTML=`<div style="text-align:center;color:var(--muted);padding:52px 0"><div style="font-size:40px;margin-bottom:11px">📭</div><div>沒有符合的任務</div></div>`;document.getElementById('taskCount').textContent='';return;}
   list.innerHTML=fil.map(t=>{
-    const aids=getAIds(t),ov=isOverdue(t),ds=isDueSoon(t);
+    const aids=getAIds(t),ov=isOverdue(t),ds=isDueSoon(t),blocked=isBlocked(t);
     const bd=[];
     if(isMgr()){
       aids.forEach(aid=>{const m=mGet(aid),c=mColor(aid);if(m)bd.push(`<span class="badge" style="background:${c}20;color:${c}">${esc(m.name)}</span>`);});
     }
-    if(t.priority==='urgent')bd.push(`<span class="badge" style="background:#ef444420;color:#ef4444">🚨 緊急</span>`);
+    if(blocked)bd.push(`<span class="blocked-badge">⛔ 被阻塞</span>`);
+    const priMap={low:['⬇️ 低','#64748b'],normal:null,high:['⬆️ 高','#f97316'],urgent:['🚨 緊急','#ef4444']};
+    const priInfo=priMap[t.priority];
+    if(priInfo)bd.push(`<span class="badge" style="background:${priInfo[1]}20;color:${priInfo[1]}">${priInfo[0]}</span>`);
     if(t.type==='deadline'&&t.deadline)bd.push(`<span class="badge" style="background:${ov?'#ef444420':ds?'#f9731620':'#1e2d45'};color:${ov?'#ef4444':ds?'var(--orange)':'var(--muted)'}">${ov?'⚠️ 逾期':ds?'⏰ 即將到期':'📅'} ${t.deadline}</span>`);
     if(t.type==='recurring'&&t.recurrence)bd.push(`<span class="badge" style="background:#22c55e18;color:#22c55e">🔄 ${recurLabel(t)}</span>`);
     if(t.source==='ai')bd.push(`<span class="badge" style="background:#a855f720;color:#a855f7;font-size:10px">AI</span>`);
-    // Tags
     getTags(t).forEach(tag=>bd.push(`<span class="task-tag" style="background:${tagColor(tag)}18;color:${tagColor(tag)};border-color:${tagColor(tag)}40" onclick="filterByTag('${esc(tag)}')">#${esc(tag)}</span>`));
-    const bg=ov?'var(--card)':ds?'var(--card)':'var(--card)';
     const bgl=ov?'#1a0d0d':ds?'#1a1000':null;
-    const bc=ov?'#ef444435':ds?'#f9731635':t.priority==='urgent'?'#f9731630':'var(--border)';
+    const bc=blocked?'#ef444430':ov?'#ef444435':ds?'#f9731635':t.priority==='urgent'?'#f9731630':t.priority==='high'?'#f9731625':'var(--border)';
     const bgStyle=bgl?`background:${bgl}`:'';
     const q=getSearchQ();
     const highlightText=(text)=>{
@@ -1296,7 +1359,13 @@ function renderTasks(){
     const lastCommentHtml=lastComment?`<div style="font-size:11px;color:var(--muted);margin-top:5px;padding:5px 8px;background:var(--input-bg);border-radius:7px;border-left:2px solid var(--border)">
       <span style="font-weight:600">${esc(lastComment.author||'未知')}</span>：${esc(lastComment.text.slice(0,60))}${lastComment.text.length>60?'...':''}
     </div>`:'';
-    return `<div class="task-card${t.completed?' done':''}${ov?' overdue':''}${t.priority==='urgent'&&!ov?' urgent-card':''}" style="${bgStyle};border:1px solid ${bc}">
+    const subtasks=t.subtasks||[];
+    const stDone=subtasks.filter(s=>s.completed).length;
+    const subtaskHtml=subtasks.length?`<div style="margin-top:7px;padding:6px 8px;background:var(--input-bg);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">子任務 ${stDone}/${subtasks.length}</div>
+      ${subtasks.map(s=>`<div class="subtask-row"><button onclick="event.stopPropagation();toggleSubtask('${t.id}','${s.id}')" class="subtask-cb${s.completed?' done':''}">${s.completed?'✓':''}</button><span style="text-decoration:${s.completed?'line-through':'none'};color:${s.completed?'var(--muted)':'var(--text)'}">${esc(s.title)}</span></div>`).join('')}
+    </div>`:'';
+    return `<div class="task-card${t.completed?' done':''}${ov?' overdue':''}${t.priority==='urgent'&&!ov&&!blocked?' urgent-card':''}${t.priority==='high'&&!ov&&!blocked?' high-card':''}" style="${bgStyle};border:1px solid ${bc}">
       <div style="display:flex;gap:11px;align-items:flex-start">
         <button onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:1px;border:2px solid ${t.completed?'var(--green)':'var(--border)'};background:${t.completed?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;transition:all .2s;min-width:24px">${t.completed?'✓':''}</button>
         <div style="flex:1;min-width:0">
@@ -1304,6 +1373,7 @@ function renderTasks(){
           ${descHtml}
           ${progressBar}
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:${progressBar?'6px':'0'}">${bd.join('')}</div>
+          ${subtaskHtml}
           ${lastCommentHtml}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
@@ -1400,7 +1470,7 @@ function updateRoleUI(){
   document.getElementById('addMemberSection').style.display=mgr?'':'none';
   ['dReminderTab','nav-reminders'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';});
   // Changes 5, 6, 7: manager-only settings sections
-  ['giteeHowToBanner','giteeSetupBanner','wxpSetupGuide','wxpTestHint','aboutCard','autoReminderCard'].forEach(id=>{
+  ['giteeHowToBanner','giteeSetupBanner','wxpSetupGuide','wxpTestHint','aboutCard','autoReminderCard','templateCard'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';
   });
 }
@@ -1626,7 +1696,7 @@ function toggleAddTask(){
   f.style.display=show?'':'none';
   btn.textContent=show?'✕ 取消':'＋ 新增任務';
   btn.className=show?'btn btn-ghost btn-full':'btn btn-primary btn-full';
-  if(show) buildAssigneeCheckboxes('fAssigneeList',[]);
+  if(show){buildAssigneeCheckboxes('fAssigneeList',[]);updateTemplateSelect();formSubtasksAdd=[];renderFormSubtasks('f');}
 }
 function buildAssigneeCheckboxes(containerId,selectedIds){
   const wrap=document.getElementById(containerId);if(!wrap)return;
@@ -1675,7 +1745,7 @@ function addTask(){
   }
   const recurStart=type==='recurring'?document.getElementById('fRecurStart').value||null:null;
   const tags=parseTags(document.getElementById('fTags').value);
-  S.tasks.push({
+  const newTask={
     id:'t'+Date.now(),title,description:desc||null,
     assigneeIds:aids,
     deadline:type==='deadline'?document.getElementById('fDeadline').value:null,
@@ -1683,8 +1753,14 @@ function addTask(){
     recurrenceDay:recurDay, recurrenceStart:recurStart,
     priority:document.getElementById('fPriority').value,
     tags, comments:[],
+    subtasks:[...formSubtasksAdd],
+    blockedBy:[],activityLog:[],
     completed:false, createdAt:new Date().toISOString()
-  });
+  };
+  S.tasks.push(newTask);
+  logActivity(newTask,'created');
+  formSubtasksAdd=[];renderFormSubtasks('f');
+  document.getElementById('fTemplate').value='';
   markDirty();renderAll();toggleAddTask();
   document.getElementById('fTitle').value='';document.getElementById('fDesc').value='';
   document.getElementById('fTags').value='';document.getElementById('fTagsPreview').innerHTML='';
@@ -1693,7 +1769,7 @@ function addTask(){
 function toggleTask(id){
   const t=S.tasks.find(t=>t.id===id);if(!t)return;
   t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;
-  // Change 4: auto-spawn next recurring occurrence when completed
+  logActivity(t,t.completed?'completed':'reopened');
   if(t.completed&&t.type==='recurring'){
     spawnNextRecurring(t);
   }
@@ -1755,10 +1831,13 @@ function openEditTaskModal(id){
   document.getElementById('eTTags').value=getTags(t).join(' ');
   renderTagsPreview('eTTagsPreview',getTags(t));
   buildAssigneeCheckboxes('eTAssigneeList',getAIds(t));
+  formSubtasksEdit=(t.subtasks||[]).map(s=>({...s}));
+  renderFormSubtasks('eT');
+  buildBlockerList(id,t.blockedBy||[]);
   toggleEditFields();
   document.getElementById('editTaskModal').style.display='flex';
 }
-function closeEditTaskModal(){editId=null;document.getElementById('editTaskModal').style.display='none';}
+function closeEditTaskModal(){editId=null;formSubtasksEdit=[];document.getElementById('editTaskModal').style.display='none';}
 function toggleEditFields(){
   const t=document.getElementById('eTType').value;
   document.getElementById('eTDeadlineField').style.display=t==='deadline'?'':'none';
@@ -1783,6 +1862,7 @@ function saveTaskEdit(){
     if(recur==='weekly'||recur==='biweekly') recurDay=parseInt(document.getElementById('eTRecurDayWeek').value);
     else if(recur==='monthly'||recur==='bimonthly') recurDay=parseInt(document.getElementById('eTRecurDayMonth').value);
   }
+  const oldTitle=t.title,oldPriority=t.priority;
   t.title=title;
   t.description=document.getElementById('eTDesc').value.trim()||null;
   t.assigneeIds=aids;delete t.assigneeId;
@@ -1793,6 +1873,12 @@ function saveTaskEdit(){
   t.recurrenceStart=type==='recurring'?document.getElementById('eTRecurStart').value||null:null;
   t.priority=document.getElementById('eTPriority').value;
   t.tags=parseTags(document.getElementById('eTTags').value);
+  t.subtasks=[...formSubtasksEdit];
+  t.blockedBy=getSelectedBlockers();
+  const changes=[];
+  if(oldTitle!==title)changes.push('標題');
+  if(oldPriority!==t.priority)changes.push('優先級');
+  logActivity(t,'edited',changes.length?changes.join('、'):'');
   markDirty();renderAll();closeEditTaskModal();showToast('任務已更新 ✓');
 }
 function addMember(){
@@ -2103,6 +2189,7 @@ function openCommentModal(taskId){
   document.getElementById('progressSlider').value=t.progress||0;
   document.getElementById('progressDisplay').textContent=(t.progress||0)+'%';
   renderExistingComments(t);
+  renderActivityLog(t);
   document.getElementById('commentModal').style.display='flex';
 }
 function closeCommentModal(){commentTaskId=null;document.getElementById('commentModal').style.display='none';}
@@ -2140,8 +2227,10 @@ function saveComment(){
     progress,ts:new Date().toISOString()
   });
   t.progress=progress;
+  logActivity(t,'commented',text.slice(0,50)+(text.length>50?'...':''));
   markDirty();renderAll();
   renderExistingComments(t);
+  renderActivityLog(t);
   document.getElementById('commentText').value='';
   showToast('備注已提交 ✓');
 }
@@ -2242,6 +2331,156 @@ document.addEventListener('input',e=>{
   if(e.target.id==='fTags')renderTagsPreview('fTagsPreview',parseTags(e.target.value));
   if(e.target.id==='eTTags')renderTagsPreview('eTTagsPreview',parseTags(e.target.value));
 });
+
+// ══ FEATURE 6: SUBTASKS ══════════════════════════════════════════════════════
+function addSubtaskToForm(prefix){
+  const input=document.getElementById(prefix+'SubtaskInput');
+  const title=(input?.value||'').trim();
+  if(!title){showToast('請輸入子任務標題','error');return;}
+  const arr=prefix==='f'?formSubtasksAdd:formSubtasksEdit;
+  arr.push({id:'s'+Date.now()+Math.random().toString(36).slice(2),title,completed:false});
+  renderFormSubtasks(prefix);
+  input.value='';input.focus();
+}
+function removeSubtaskFromForm(prefix,idx){
+  const arr=prefix==='f'?formSubtasksAdd:formSubtasksEdit;
+  arr.splice(idx,1);renderFormSubtasks(prefix);
+}
+function renderFormSubtasks(prefix){
+  const el=document.getElementById(prefix+'SubtaskList');if(!el)return;
+  const arr=prefix==='f'?formSubtasksAdd:formSubtasksEdit;
+  if(!arr.length){el.innerHTML='';return;}
+  el.innerHTML=arr.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:var(--input-bg);border-radius:8px;margin-bottom:4px;border:1px solid var(--border)">
+      <span style="font-size:12px;flex:1;line-height:1.4">${esc(s.title)}</span>
+      <button type="button" onclick="removeSubtaskFromForm('${prefix}',${i})" style="background:transparent;border:none;color:var(--muted);font-size:16px;padding:1px 4px;cursor:pointer;line-height:1;min-height:auto" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">×</button>
+    </div>`).join('');
+}
+function toggleSubtask(taskId,subtaskId){
+  const t=S.tasks.find(t=>t.id===taskId);if(!t)return;
+  const s=(t.subtasks||[]).find(s=>s.id===subtaskId);if(!s)return;
+  s.completed=!s.completed;
+  logActivity(t,s.completed?'subtask_done':'subtask_reopened',s.title);
+  markDirty();renderAll();
+}
+
+// ══ FEATURE 7: TASK DEPENDENCIES ═════════════════════════════════════════════
+function isBlocked(t){
+  if(!t.blockedBy||!t.blockedBy.length)return false;
+  return t.blockedBy.some(id=>{const bt=S.tasks.find(x=>x.id===id);return bt&&!bt.completed;});
+}
+function buildBlockerList(currentTaskId,selectedIds){
+  const el=document.getElementById('eTBlockedByList');if(!el)return;
+  const others=S.tasks.filter(t=>t.id!==currentTaskId&&!t.completed);
+  if(!others.length){el.innerHTML=`<div style="color:var(--muted);text-align:center;padding:4px">沒有其他待辦任務</div>`;return;}
+  el.innerHTML=others.map(t=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:4px 2px;cursor:pointer">
+      <input type="checkbox" value="${t.id}" ${selectedIds.includes(t.id)?'checked':''} style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;flex-shrink:0">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${esc(t.title)}</span>
+    </label>`).join('');
+}
+function getSelectedBlockers(){
+  const el=document.getElementById('eTBlockedByList');if(!el)return[];
+  return [...el.querySelectorAll('input[type=checkbox]:checked')].map(c=>c.value);
+}
+
+// ══ FEATURE 8: ACTIVITY LOG ═══════════════════════════════════════════════════
+function logActivity(task,action,detail=''){
+  if(!task.activityLog)task.activityLog=[];
+  task.activityLog.push({
+    id:'a'+Date.now(),
+    userId:myId()||'__manager__',
+    userName:S.identity.name||'系統',
+    action,detail,
+    ts:new Date().toISOString()
+  });
+}
+function renderActivityLog(t){
+  const el=document.getElementById('activityLogList');if(!el)return;
+  const log=t.activityLog||[];
+  if(!log.length){el.innerHTML=`<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">暫無記錄</div>`;return;}
+  const icons={created:'✨',edited:'✏️',completed:'✅',reopened:'↩️',commented:'💬',subtask_done:'☑️',subtask_reopened:'☐'};
+  const labels={created:'建立任務',edited:'修改任務',completed:'標記完成',reopened:'重新開啟',commented:'新增備注',subtask_done:'完成子任務',subtask_reopened:'重新開啟子任務'};
+  el.innerHTML=log.slice().reverse().map(a=>`
+    <div class="activity-row">
+      <span style="flex-shrink:0">${icons[a.action]||'📌'}</span>
+      <div>
+        <span style="font-weight:700;color:var(--text)">${esc(a.userName)}</span>
+        <span> ${esc(labels[a.action]||a.action)}${a.detail?`：${esc(a.detail.slice(0,40)+(a.detail.length>40?'...':''))}`:''}</span>
+        <span style="margin-left:6px">${new Date(a.ts).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ══ FEATURE 9: TEMPLATES ═════════════════════════════════════════════════════
+function saveAsTemplate(){
+  const t=S.tasks.find(t=>t.id===editId);if(!t)return;
+  const name=prompt('請輸入模板名稱：',t.title);
+  if(!name||!name.trim())return;
+  if(!S.templates)S.templates=[];
+  const stpls=(t.subtasks||[]).map(s=>({...s,id:'s'+Date.now()+Math.random().toString(36).slice(2),completed:false}));
+  S.templates.push({
+    id:'tpl'+Date.now(),name:name.trim(),
+    title:t.title,description:t.description,
+    type:t.type,recurrence:t.recurrence,
+    recurrenceDay:t.recurrenceDay,recurrenceStart:t.recurrenceStart,
+    priority:t.priority,tags:[...getTags(t)],
+    subtasks:stpls,assigneeIds:[...getAIds(t)],
+  });
+  saveLocal();renderTemplates();
+  showToast(`✓ 已儲存模板「${name.trim()}」`);
+}
+function applyTemplate(){
+  const id=document.getElementById('fTemplate').value;
+  if(!id)return;
+  const tpl=S.templates.find(t=>t.id===id);if(!tpl)return;
+  document.getElementById('fTitle').value=tpl.title||'';
+  document.getElementById('fDesc').value=tpl.description||'';
+  document.getElementById('fType').value=tpl.type||'deadline';
+  document.getElementById('fPriority').value=tpl.priority||'normal';
+  document.getElementById('fTags').value=(tpl.tags||[]).join(' ');
+  renderTagsPreview('fTagsPreview',tpl.tags||[]);
+  toggleDeadlineField();
+  if(tpl.type==='recurring'){
+    document.getElementById('fRecur').value=tpl.recurrence||'weekly';
+    toggleRecurDay();
+    if(tpl.recurrenceDay!=null){
+      const r=tpl.recurrence||'';
+      if(r==='weekly'||r==='biweekly')document.getElementById('fRecurDayWeek').value=tpl.recurrenceDay;
+      if(r==='monthly'||r==='bimonthly')document.getElementById('fRecurDayMonth').value=tpl.recurrenceDay;
+    }
+  }
+  buildAssigneeCheckboxes('fAssigneeList',tpl.assigneeIds||[]);
+  formSubtasksAdd=(tpl.subtasks||[]).map(s=>({...s,id:'s'+Date.now()+Math.random().toString(36).slice(2),completed:false}));
+  renderFormSubtasks('f');
+  showToast(`✓ 已套用模板「${tpl.name}」`);
+}
+function deleteTemplate(id){
+  if(!confirm('確定刪除此模板？'))return;
+  S.templates=(S.templates||[]).filter(t=>t.id!==id);
+  saveLocal();renderTemplates();showToast('模板已刪除');
+}
+function renderTemplates(){
+  const el=document.getElementById('templateList');if(!el)return;
+  const tpls=S.templates||[];
+  updateTemplateSelect();
+  if(!tpls.length){el.innerHTML=`<div style="color:var(--muted);font-size:12px;text-align:center;padding:12px">尚未儲存任何模板</div>`;return;}
+  const priLabel={low:'⬇️ 低',normal:'',high:'⬆️ 高',urgent:'🚨 緊急'};
+  el.innerHTML=tpls.map(t=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card2);border-radius:10px;margin-bottom:7px;border:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px">${esc(t.name)}</div>
+        <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.title)}${priLabel[t.priority]?` · ${priLabel[t.priority]}`:''}${t.subtasks&&t.subtasks.length?` · ${t.subtasks.length} 子任務`:''}</div>
+      </div>
+      <button onclick="deleteTemplate('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:18px;padding:2px 4px;cursor:pointer;line-height:1;min-height:auto" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">×</button>
+    </div>`).join('');
+}
+function updateTemplateSelect(){
+  const sel=document.getElementById('fTemplate');if(!sel)return;
+  const tpls=S.templates||[];
+  sel.innerHTML='<option value="">— 不使用模板 —</option>'+
+    tpls.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+}
 
 // ══ FEATURE 5: THEME ═════════════════════════════════════════════════════════
 function applyTheme(){
