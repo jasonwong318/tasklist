@@ -1069,16 +1069,7 @@ function seed(){
     {id:'m2',name:'戴豐逸',wxpUid:'',wechatId:'dai_fengyi', dept:'深圳'},
     {id:'m3',name:'李志明',wxpUid:'',wechatId:'li_zhiming', dept:'廣州'},
   ];
-  const d=(offset)=>{const d=new Date();d.setDate(d.getDate()+offset);return d.toISOString().slice(0,10);};
-  S.tasks=[
-    {id:'t1',title:'整理Q1財務報告並提交董事會審批',assigneeIds:['m1'],deadline:d(7),  type:'deadline',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
-    {id:'t2',title:'追蹤辦理情形存放於雲端並回報',  assigneeIds:['m1'],type:'recurring',recurrence:'weekly',recurrenceDay:1,  priority:'normal',completed:false,createdAt:new Date().toISOString()},
-    {id:'t3',title:'製作支票並上簽',                 assigneeIds:['m1'],deadline:d(-2), type:'deadline',priority:'normal',completed:true, createdAt:new Date().toISOString()},
-    {id:'t4',title:'月度合規報告審查',               assigneeIds:['m2'],type:'recurring',recurrence:'monthly',recurrenceDay:1, priority:'normal',completed:false,createdAt:new Date().toISOString()},
-    {id:'t5',title:'更新供應商聯絡名單',             assigneeIds:['m3'],deadline:d(2),  type:'deadline',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
-    {id:'t6',title:'季度業績回顧報告',               assigneeIds:['m2','m3'],type:'recurring',recurrence:'quarterly',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
-    {id:'t7',title:'確認4月份工作人員並提交公會計納保',assigneeIds:['m1'],deadline:d(1), type:'deadline',priority:'urgent',completed:false,createdAt:new Date().toISOString()},
-  ];
+  S.tasks=[];
   S.identity={role:'',memberId:'',name:''};
   S.lastSha='';
   saveLocal();
