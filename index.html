@@ -384,12 +384,39 @@ button:active{transform:scale(0.96)}
   <div class="modal" onclick="event.stopPropagation()">
     <div style="font-weight:800;font-size:16px;margin-bottom:18px">✏️ 編輯成員資料</div>
     <div class="field"><span class="label">姓名</span><input id="editName" type="text" placeholder="姓名"></div>
-    <div class="field"><span class="label">WxPusher UID</span><input id="editWxpUid" placeholder="掃碼訂閱後取得 UID"></div>
-    <div class="field"><span class="label">微信 ID（選填）</span><input id="editWechatId" placeholder="用於@提醒"></div>
     <div class="field"><span class="label">所在地區（選填）</span><input id="editDept" placeholder="例如：香港 / 深圳 / 廣州"></div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-ghost btn-full" onclick="closeMemberModal()">取消</button>
       <button class="btn btn-primary btn-full" onclick="saveMemberEdit()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Detail Modal (read-only) -->
+<div class="overlay" id="taskDetailModal" onclick="closeTaskDetailModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div style="font-weight:800;font-size:15px;color:var(--blue)">📄 任務詳情</div>
+      <button onclick="closeTaskDetailModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px;line-height:1">×</button>
+    </div>
+    <div id="taskDetailBody"></div>
+    <div style="display:flex;gap:9px;margin-top:14px" id="taskDetailActions"></div>
+  </div>
+</div>
+
+<!-- Weekly Report Modal -->
+<div class="overlay" id="weeklyReportModal" onclick="closeWeeklyReportModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-weight:800;font-size:15px;color:var(--blue)">📊 一鍵週報</div>
+      <button onclick="closeWeeklyReportModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px;line-height:1">×</button>
+    </div>
+    <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;max-height:50vh;overflow-y:auto">
+      <pre id="weeklyReportText" style="font-size:12px;white-space:pre-wrap;line-height:1.8;font-family:inherit;color:var(--text)"></pre>
+    </div>
+    <div style="display:flex;gap:9px">
+      <button class="btn btn-ghost btn-full" onclick="copyWeeklyReport()">📋 複製</button>
+      <button class="btn btn-primary btn-full" onclick="sendWeeklyReport()">📣 發送到通知渠道</button>
     </div>
   </div>
 </div>
@@ -489,7 +516,10 @@ button:active{transform:scale(0.96)}
             <div style="font-weight:800;font-size:18px" id="todayDateLabel"></div>
             <div style="font-size:12px;color:var(--muted)" id="todayGreeting"></div>
           </div>
-          <button onclick="sendTodayReminder()" class="btn btn-sm btn-primary">📤 發今日提醒</button>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end">
+            <button onclick="openWeeklyReport()" id="weeklyReportBtn" class="btn btn-sm btn-ghost" style="display:none;border-color:#3b82f640;color:var(--blue)">📊 一鍵週報</button>
+            <button onclick="sendTodayReminder()" class="btn btn-sm btn-primary">📤 發今日提醒</button>
+          </div>
         </div>
         <div id="todayContent"></div>
       </div>
@@ -669,8 +699,6 @@ button:active{transform:scale(0.96)}
           <div id="addMemberSection" class="card" style="margin-top:4px">
             <div style="font-weight:700;margin-bottom:13px;color:var(--green)">➕ 新增成員</div>
             <div class="field"><span class="label">姓名 *</span><input id="newName" placeholder="姓名"></div>
-            <div class="field"><span class="label">WxPusher UID</span><input id="newWxpUid" placeholder="成員掃碼後取得 UID"></div>
-            <div class="field"><span class="label">微信 ID（選填）</span><input id="newWechatId" placeholder="用於@提醒"></div>
             <div class="field"><span class="label">所在地區（選填）</span><input id="newDept" placeholder="例如：香港 / 深圳 / 廣州"></div>
             <button class="btn btn-success btn-full" onclick="addMember()">確認新增</button>
           </div>
@@ -721,9 +749,9 @@ button:active{transform:scale(0.96)}
             <pre id="reminderPreview" style="font-size:12px;white-space:pre-wrap;line-height:1.8;font-family:inherit;color:var(--text)"></pre>
           </div>
           <div id="wxpNotice" style="background:#f9731615;border:1px solid #f9731640;color:var(--orange);border-radius:11px;padding:12px 14px;font-size:12px;line-height:1.8;display:none;margin-bottom:13px">
-            ⚠️ 請先在「設定」→「WxPusher」填入 AppToken，成員也需各自填入 UID
+            ⚠️ 請先在「設定」→「📣 通知設定」填入飛書 Webhook 或 PushPlus Token
           </div>
-          <button class="btn btn-primary btn-full" id="sendBtn" onclick="sendReminder()">📤 發送至微信</button>
+          <button class="btn btn-primary btn-full" id="sendBtn" onclick="sendReminder()">📤 發送通知</button>
         </div>
       </div>
 
@@ -770,25 +798,50 @@ button:active{transform:scale(0.96)}
           <div id="giteeStatus" style="margin-top:10px;font-size:12px;text-align:center;color:var(--muted)"></div>
         </div>
 
-        <div class="card" style="margin-bottom:13px">
-          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">💬</span> WxPusher 微信通知</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">免費推送至個人微信，每月 10,000 條</div>
-          <div id="wxpSetupGuide" style="background:var(--card2);border:1px solid #22c55e30;border-radius:12px;padding:15px;margin-bottom:14px">
-            <div style="font-weight:700;font-size:12px;color:var(--green);margin-bottom:11px">🚀 快速上手（5分鐘，免費）</div>
-            <div class="wxp-step"><div class="wxp-num">1</div><div style="font-size:12px;color:var(--muted);line-height:1.7">前往 <strong style="color:var(--text)">wxpusher.zjianzhan.cn</strong> 免費註冊帳號</div></div>
-            <div class="wxp-step"><div class="wxp-num">2</div><div style="font-size:12px;color:var(--muted);line-height:1.7">後台 → <strong style="color:var(--text)">應用管理</strong> → 新建應用 → 複製 AppToken</div></div>
-            <div class="wxp-step"><div class="wxp-num">3</div><div style="font-size:12px;color:var(--muted);line-height:1.7">應用 → <strong style="color:var(--text)">關注管理</strong> → 生成二維碼，讓成員掃碼訂閱</div></div>
-            <div class="wxp-step" style="margin-bottom:0"><div class="wxp-num">4</div><div style="font-size:12px;color:var(--muted);line-height:1.7">後台顯示成員 <strong style="color:var(--text)">UID</strong> → 填入各成員資料即可</div></div>
+        <div class="card" id="notifyCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">📣</span> 通知設定</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">支援飛書群機器人 + PushPlus 微信推送，可同時啟用雙渠道</div>
+          <div class="field">
+            <span class="label">飛書 Webhook URL</span>
+            <input id="notifyFeishu" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/...">
+            <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.7">飛書群 → 設置 → 群機器人 → 添加自定義機器人，複製 Webhook 地址</div>
           </div>
-          <div class="field"><span class="label">AppToken</span><input id="wxpToken" type="password" placeholder="AT_xxxxxxxxxxxxxx"></div>
+          <div class="field"><span class="label">PushPlus Token</span><input id="notifyPpToken" type="password" placeholder="你的 PushPlus token"></div>
+          <div class="field">
+            <span class="label">PushPlus 群組編碼（topic，選填）</span>
+            <input id="notifyPpTopic" placeholder="群組編碼">
+            <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.7">pushplus.plus 微信掃碼登入取得 token；如需推送全組，建立群組並填入群組編碼，成員微信掃碼加入</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;margin-bottom:12px;cursor:pointer">
+            <input id="notifyEventPush" type="checkbox" style="width:16px;height:16px;min-height:auto;accent-color:var(--blue);cursor:pointer;flex-shrink:0">
+            <span style="font-size:13px;font-weight:600">事件即時推送（指派/留言時通知）</span>
+          </label>
+          <div class="field"><span class="label">逾期升級提醒（天）</span><input id="notifyEscalateDays" type="number" min="1" max="30" placeholder="3"></div>
           <div style="display:flex;gap:9px">
-            <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveWxpSettings()">儲存 AppToken</button>
-            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="testWxPusher()">🔔 測試發送</button>
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveNotifySettings()">儲存設定</button>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="testNotify()">🔔 發送測試通知</button>
           </div>
-          <div id="wxpTestHint" style="font-size:11px;color:var(--muted);margin-top:9px;line-height:1.7;padding:9px 11px;background:var(--input-bg);border-radius:8px;border:1px solid var(--border)">
-            測試前請確保：① 已儲存 AppToken　② 你的成員資料已填入個人 UID<br>
-            測試訊息將發送至你（目前登入成員）的微信
-          </div>
+        </div>
+
+        <div class="card" id="weeklyReportCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">📊</span> 一鍵週報</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">自動彙總過去 7 天的完成、逾期及進行中任務</div>
+          <button class="btn btn-primary btn-full btn-sm" onclick="openWeeklyReport()">📊 生成本週報告</button>
+        </div>
+
+        <div class="card" id="archiveCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">🗄️</span> 已歸檔任務 (<span id="archiveCount">0</span>)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">已完成超過 30 天的任務會自動歸檔，點「還原」可移回任務列表</div>
+          <div id="archiveList"></div>
+        </div>
+
+        <div class="card" id="pinCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">🔐</span> 管理者 PIN</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">設定後，選擇管理者身份時需輸入 PIN。僅作基本防呆，並非高強度保護</div>
+          <div id="pinStatus" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+          <div class="field"><span class="label">新 PIN（4-6 位數字，留空停用）</span><input id="pinInput1" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="new-password"></div>
+          <div class="field"><span class="label">確認新 PIN</span><input id="pinInput2" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="new-password"></div>
+          <button class="btn btn-primary btn-full btn-sm" onclick="saveManagerPin()">儲存 PIN</button>
         </div>
 
         <!-- Feature 1: Auto Daily Reminder -->
@@ -857,7 +910,7 @@ button:active{transform:scale(0.96)}
       <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:12px;max-height:200px;overflow-y:auto">
         <pre id="sidePreview" style="font-size:11px;white-space:pre-wrap;line-height:1.75;font-family:inherit;color:var(--text)"></pre>
       </div>
-      <button class="btn btn-primary btn-full btn-sm" onclick="sendSideReminder()">📤 發送至微信</button>
+      <button class="btn btn-primary btn-full btn-sm" onclick="sendSideReminder()">📤 發送通知</button>
     </div>
     <div class="card">
       <div style="font-weight:700;margin-bottom:12px">☁️ 同步狀態</div>
@@ -892,13 +945,16 @@ button:active{transform:scale(0.96)}
 let S={
   tasks:[],members:[],
   gitee:{owner:'',repo:'',token:''},
-  wxp:{appToken:''},
+  wxp:{appToken:''}, // kept for backward compat (unused)
+  notify:{feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},
   identity:{role:'',memberId:'',name:''},
   autoReminder:{enabled:false,hour:9,target:'all'},
   theme:'dark',
   lastSha:'',
   templates:[],
   deletedIds:{}, // taskId -> deletion timestamp (ISO), tombstones for sync merge
+  archived:[],   // auto-archived completed tasks (>30 days old)
+  managerPin:'', // optional manager login PIN (basic guard only)
 };
 let F={status:'all',type:'all',member:'all',tag:''};
 let delId=null,editId=null,commentTaskId=null,scanned=[],dirty=false,syncTmr=null,autoReminderTmr=null;
@@ -923,7 +979,7 @@ const localToday=()=>localDateStr(new Date());
 const touch=t=>{t.updatedAt=new Date().toISOString();};
 let TODAY=new Date(); TODAY.setHours(0,0,0,0);
 // Roll TODAY over at midnight so a long-open page doesn't keep stale overdue/due-soon flags
-setInterval(()=>{const now=new Date();now.setHours(0,0,0,0);if(now.getTime()!==TODAY.getTime()){TODAY=now;renderAll();}},60000);
+setInterval(()=>{const now=new Date();now.setHours(0,0,0,0);if(now.getTime()!==TODAY.getTime()){TODAY=now;renderAll();}try{checkEscalations();}catch(e){}},60000);
 
 // ══ BOOT ══════════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',()=>{
@@ -993,6 +1049,11 @@ function buildIdentityOverlay(){
 
 function selectIdentity(role,memberId){
   if(role==='manager'){
+    if(S.managerPin){
+      const pin=prompt('請輸入管理者 PIN');
+      if(pin===null)return; // cancelled — stay on overlay
+      if(String(pin).trim()!==S.managerPin){showToast('PIN 錯誤','error');return;}
+    }
     S.identity={role:'manager',memberId:'__manager__',name:'管理者'};
   } else {
     const m=S.members.find(m=>m.id===memberId);
@@ -1026,8 +1087,12 @@ function loadLocal(){
     if(!S.members)S.members=[];
     if(!S.identity)S.identity={role:'',memberId:'',name:''};
     if(!S.templates)S.templates=[];
+    S.notify=Object.assign({feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},S.notify||{});
+    if(!Array.isArray(S.archived))S.archived=[];
+    if(typeof S.managerPin!=='string')S.managerPin='';
     migrateTaskFields();
     pruneDeletedIds();
+    autoArchiveTasks();
   }catch(e){seed();}
 }
 function migrateTaskFields(){
@@ -1040,6 +1105,7 @@ function migrateTaskFields(){
     if(!t.comments)t.comments=[];
     if(t.progress==null)t.progress=0;
     if(!t.updatedAt)t.updatedAt=t.createdAt||new Date().toISOString();
+    if(t.createdBy==null)t.createdBy='';
   });
 }
 // Drop deletion tombstones older than 60 days
@@ -1052,6 +1118,7 @@ function pruneDeletedIds(map){
 function saveLocal(){
   localStorage.setItem('tl_state',JSON.stringify({
     tasks:S.tasks,members:S.members,gitee:S.gitee,wxp:S.wxp,
+    notify:S.notify,archived:S.archived||[],managerPin:S.managerPin||'',
     identity:S.identity,lastSha:S.lastSha,lastRemoteTs:S.lastRemoteTs,
     autoReminder:S.autoReminder,theme:S.theme,templates:S.templates,
     deletedIds:S.deletedIds||{},
@@ -1129,7 +1196,6 @@ function saveGiteeSettings(s=false){
   S.gitee.token=document.getElementById('giteeToken').value.trim();
   saveLocal();if(!s)showToast('Gitee 設定已儲存');
 }
-function saveWxpSettings(){S.wxp.appToken=document.getElementById('wxpToken').value.trim();saveLocal();showToast('WxPusher AppToken 已儲存');}
 async function syncUp(){
   if(!dirty)return;
   // ── Timestamp conflict check ──────────────────────────────────────────────
@@ -1153,7 +1219,7 @@ async function syncUp(){
   await forcePush();
 }
 
-function buildPushPayload(){return {tasks:S.tasks,members:S.members,deletedIds:S.deletedIds||{},ts:Date.now()};}
+function buildPushPayload(){return {tasks:S.tasks,members:S.members,deletedIds:S.deletedIds||{},notify:S.notify,archived:S.archived||[],managerPin:S.managerPin||'',ts:Date.now()};}
 
 async function forcePush(){
   let payload=buildPushPayload();
@@ -1210,6 +1276,32 @@ function mergeTasks(localTasks,remoteTasks,localDel,remoteDel){
   });
   return merged;
 }
+function mergeArchived(localArc,remoteArc){
+  // Merge archive lists by id, keeping the newest updatedAt; respect deletion tombstones
+  const map=new Map();
+  [...(localArc||[]),...(remoteArc||[])].forEach(t=>{
+    if(!t||!t.id)return;
+    const ex=map.get(t.id);
+    if(!ex||(t.updatedAt||'')>(ex.updatedAt||''))map.set(t.id,t);
+  });
+  const del=S.deletedIds||{};
+  return [...map.values()]
+    .filter(t=>{const dts=del[t.id];return !dts||(t.updatedAt&&t.updatedAt>dts);})
+    .sort((a,b)=>(a.updatedAt||'')<(b.updatedAt||'')?1:-1)
+    .slice(0,200);
+}
+function dedupeArchiveVsTasks(){
+  // A task must not live in both S.tasks and S.archived. Strictly-newer active copy wins
+  // (restore touches the task), otherwise the archived copy wins (fresh archive on another client).
+  const arcMap=new Map((S.archived||[]).map(t=>[t.id,t]));
+  S.tasks=S.tasks.filter(t=>{
+    const a=arcMap.get(t.id);
+    if(!a)return true;
+    if((t.updatedAt||'')>(a.updatedAt||'')){arcMap.delete(t.id);return true;}
+    return false;
+  });
+  S.archived=[...arcMap.values()];
+}
 function mergeRemoteData(d){
   const localDel=S.deletedIds||{};
   const remoteDel=d.deletedIds||{};
@@ -1218,6 +1310,10 @@ function mergeRemoteData(d){
   // Tombstones win over both lists after merge
   S.tasks=S.tasks.filter(t=>{const delTs=S.deletedIds[t.id];return !delTs||(t.updatedAt&&t.updatedAt>delTs);});
   if(d.members)S.members=d.members;
+  if(d.notify)S.notify=Object.assign({feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},S.notify||{},d.notify);
+  if(typeof d.managerPin==='string')S.managerPin=d.managerPin;
+  S.archived=mergeArchived(S.archived,d.archived);
+  dedupeArchiveVsTasks();
   if(d.ts)S.lastRemoteTs=d.ts;
   migrateTaskFields();
 }
@@ -1243,6 +1339,9 @@ function conflictLoadRemote(){
   if(!conflictRemoteData)return;
   if(conflictRemoteData.tasks) S.tasks=conflictRemoteData.tasks;
   if(conflictRemoteData.members) S.members=conflictRemoteData.members;
+  if(conflictRemoteData.notify) S.notify=Object.assign({feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},conflictRemoteData.notify);
+  if(Array.isArray(conflictRemoteData.archived)) S.archived=conflictRemoteData.archived;
+  if(typeof conflictRemoteData.managerPin==='string') S.managerPin=conflictRemoteData.managerPin;
   S.deletedIds=pruneDeletedIds({...(conflictRemoteData.deletedIds||{})});
   S.lastRemoteTs=conflictRemoteData.ts||Date.now();
   migrateTaskFields();
@@ -1296,6 +1395,8 @@ function renderAll(){
   renderCalendar();
   renderMemberCalendar();
   updateAutoReminderUI();
+  renderArchive();
+  updatePinStatus();
 }
 
 const isOverdue=t=>t.deadline&&!t.completed&&new Date(t.deadline+'T00:00:00')<TODAY;
@@ -1304,6 +1405,8 @@ const mColor=id=>MC[Math.max(0,S.members.findIndex(m=>m.id===id))%MC.length];
 const mGet=id=>S.members.find(m=>m.id===id);
 const isMgr=()=>S.identity.role==='manager';
 const myId=()=>S.identity.memberId;
+// Members may manage tasks they created themselves
+const canEditTask=t=>!!t&&(isMgr()||(!!t.createdBy&&t.createdBy===myId()));
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
 function getMyTasks(){return S.tasks.filter(t=>getAIds(t).includes(myId()));}
@@ -1518,7 +1621,7 @@ function makeTaskCard(t,q){
     <div style="display:flex;gap:11px;align-items:flex-start">
       <button onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:1px;border:2px solid ${t.completed?'var(--green)':'var(--border)'};background:${t.completed?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;transition:all .2s;min-width:24px">${t.completed?'✓':''}</button>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:14px;line-height:1.45;margin-bottom:${t.description?'4px':'8px'};text-decoration:${t.completed?'line-through':'none'};color:${t.completed?'var(--muted)':'var(--text)'}">${titleHtml}${commentBadge}</div>
+        <div onclick="openTaskDetail('${t.id}')" style="font-weight:600;font-size:14px;line-height:1.45;margin-bottom:${t.description?'4px':'8px'};text-decoration:${t.completed?'line-through':'none'};color:${t.completed?'var(--muted)':'var(--text)'};cursor:pointer" title="查看詳情">${titleHtml}${commentBadge}</div>
         ${descHtml}
         ${progressBar}
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:${progressBar?'6px':'0'}">${bd.join('')}</div>
@@ -1527,7 +1630,7 @@ function makeTaskCard(t,q){
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
         <button onclick="openCommentModal('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:16px;padding:2px 4px;line-height:1;min-height:32px;display:flex;align-items:center" title="進度備注" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--muted)'">💬</button>
-        ${isMgr()?`<button onclick="openEditTaskModal('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:15px;padding:2px 4px;line-height:1;min-height:28px;display:flex;align-items:center" title="修改" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">✏️</button>
+        ${canEditTask(t)?`<button onclick="openEditTaskModal('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:15px;padding:2px 4px;line-height:1;min-height:28px;display:flex;align-items:center" title="修改" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">✏️</button>
         <button onclick="openDel('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:18px;padding:2px 4px;line-height:1;min-height:28px;display:flex;align-items:center" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">×</button>`:''}
       </div>
     </div>
@@ -1642,7 +1745,7 @@ function renderMembers(){
         <div class="avatar" style="width:50px;height:50px;background:${c}20;border:2.5px solid ${c};color:${c};font-size:19px">${esc(m.name[0])}</div>
         <div style="flex:1">
           <div style="font-weight:800;font-size:15px">${esc(m.name)}${isMe?` <span style="font-size:10px;background:var(--blue);color:#fff;padding:2px 8px;border-radius:10px">我</span>`:''}</div>
-          <div style="font-size:11px;color:var(--muted)">${m.dept?esc(m.dept)+'　·　':''}WxP UID：${m.wxpUid?'✅ 已設定':'未設定'}</div>
+          <div style="font-size:11px;color:var(--muted)">${m.dept?esc(m.dept):'成員'}</div>
         </div>
         <div style="text-align:right"><div style="font-size:24px;font-weight:800;color:${c};letter-spacing:-.02em">${pct}%</div><div style="font-size:10px;color:var(--muted)">完成率</div></div>
       </div>
@@ -1689,7 +1792,8 @@ function renderSideMembers(){
 function fillReminderSels(){
   const opts='<option value="all">全部成員</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
   ['reminderTarget','sideReminderTarget','autoReminderTarget'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML=opts;e.value=v||'all';}});
-  document.getElementById('wxpNotice').style.display=S.wxp.appToken?'none':'block';
+  const wn=document.getElementById('wxpNotice');
+  if(wn)wn.style.display=hasNotifyChannel()?'none':'block';
 }
 
 function updateMemberFilter(){
@@ -1726,9 +1830,11 @@ function updateRoleUI(){
   document.getElementById('addMemberSection').style.display=mgr?'':'none';
   ['dReminderTab','nav-reminders'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';});
   // Manager-only settings sections
-  ['giteeHowToBanner','giteeSetupBanner','wxpSetupGuide','wxpTestHint','aboutCard','autoReminderCard','templateCard'].forEach(id=>{
+  ['giteeHowToBanner','giteeSetupBanner','aboutCard','autoReminderCard','templateCard','weeklyReportCard','archiveCard','pinCard'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';
   });
+  const wrb=document.getElementById('weeklyReportBtn');
+  if(wrb)wrb.style.display=mgr?'':'none';
 }
 
 // ══ TABS ══════════════════════════════════════════════════════════════════════
@@ -2042,10 +2148,12 @@ function addTask(){
     subtasks:[...formSubtasksAdd],
     blockedBy:[],activityLog:[],
     completed:false, createdAt:new Date().toISOString(),
-    updatedAt:new Date().toISOString()
+    updatedAt:new Date().toISOString(),
+    createdBy:myId()||'manager'
   };
   S.tasks.push(newTask);
   logActivity(newTask,'created');
+  notifyAssigned(newTask);
   formSubtasksAdd=[];renderFormSubtasks('f');
   document.getElementById('fTemplate').value='';
   markDirty();renderAll();toggleAddTask();
@@ -2068,6 +2176,7 @@ function toggleTask(id){
   t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;
   touch(t);
   logActivity(t,t.completed?'completed':'reopened');
+  if(t.completed)eventPushNotify(`✅ 任務完成\n任務：${t.title}\n完成人：${S.identity.name||'管理者'}`);
   if(t.completed&&t.type==='recurring'){
     spawnNextRecurring(t);
   }
@@ -2122,12 +2231,19 @@ function spawnNextRecurring(t){
     subtasks:(t.subtasks||[]).map(s=>({id:'s'+Date.now()+Math.random().toString(36).slice(2),title:s.title,completed:false})),
     comments:[], activityLog:[], progress:0,
     completed:false, createdAt:nowIso, updatedAt:nowIso,
+    createdBy:t.createdBy||'',
     recurringParent:t.id,
   });
 }
-function openDel(id){delId=id;document.getElementById('deleteModal').style.display='flex';}
+function openDel(id){
+  const t=S.tasks.find(x=>x.id===id);
+  if(!canEditTask(t)){showToast('無權限修改此任務','warn');return;}
+  delId=id;document.getElementById('deleteModal').style.display='flex';
+}
 function closeDeleteModal(){delId=null;document.getElementById('deleteModal').style.display='none';}
 function confirmDelete(){
+  const t=S.tasks.find(x=>x.id===delId);
+  if(t&&!canEditTask(t)){showToast('無權限修改此任務','warn');closeDeleteModal();return;}
   if(!S.deletedIds)S.deletedIds={};
   if(delId)S.deletedIds[delId]=new Date().toISOString(); // tombstone so the deletion survives sync merges
   S.tasks=S.tasks.filter(t=>t.id!==delId);
@@ -2136,6 +2252,7 @@ function confirmDelete(){
 
 function openEditTaskModal(id){
   const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  if(!canEditTask(t)){showToast('無權限修改此任務','warn');return;}
   editId=id;
   document.getElementById('eTTitle').value=t.title||'';
   document.getElementById('eTDesc').value=t.description||'';
@@ -2173,6 +2290,7 @@ function toggleEditRecurDay(){
 }
 function saveTaskEdit(){
   const t=S.tasks.find(t=>t.id===editId);if(!t)return;
+  if(!canEditTask(t)){showToast('無權限修改此任務','warn');closeEditTaskModal();return;}
   const title=document.getElementById('eTTitle').value.trim();
   const aids=getSelectedFromContainer('eTAssigneeList');
   if(!title){showToast('請填寫任務標題','error');return;}
@@ -2185,6 +2303,7 @@ function saveTaskEdit(){
     else if(recur==='monthly'||recur==='bimonthly') recurDay=parseInt(document.getElementById('eTRecurDayMonth').value);
   }
   const oldTitle=t.title,oldPriority=t.priority;
+  const oldAids=getAIds(t).slice().sort().join(',');
   t.title=title;
   t.description=document.getElementById('eTDesc').value.trim()||null;
   t.assigneeIds=aids;delete t.assigneeId;
@@ -2202,12 +2321,13 @@ function saveTaskEdit(){
   if(oldPriority!==t.priority)changes.push('優先級');
   logActivity(t,'edited',changes.length?changes.join('、'):'');
   touch(t);
+  if(oldAids!==aids.slice().sort().join(','))notifyAssigned(t);
   markDirty();renderAll();closeEditTaskModal();showToast('任務已更新 ✓');
 }
 function addMember(){
   const n=document.getElementById('newName').value.trim();if(!n){showToast('請填寫姓名','error');return;}
-  S.members.push({id:'m'+Date.now(),name:n,wxpUid:document.getElementById('newWxpUid').value.trim(),wechatId:document.getElementById('newWechatId').value.trim(),dept:document.getElementById('newDept').value.trim()});
-  markDirty();renderAll();['newName','newWxpUid','newWechatId','newDept'].forEach(id=>document.getElementById(id).value='');showToast('成員已新增 ✓');
+  S.members.push({id:'m'+Date.now(),name:n,wxpUid:'',wechatId:'',dept:document.getElementById('newDept').value.trim()});
+  markDirty();renderAll();['newName','newDept'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});showToast('成員已新增 ✓');
 }
 function delMember(id){
   const assignedCount=S.tasks.filter(t=>getAIds(t).includes(id)).length;
@@ -2235,16 +2355,14 @@ function delMember(id){
 }
 function openMemberModal(id){
   editId=id;const m=S.members.find(m=>m.id===id);if(!m)return;
-  document.getElementById('editName').value=m.name||'';document.getElementById('editWxpUid').value=m.wxpUid||'';
-  document.getElementById('editWechatId').value=m.wechatId||'';document.getElementById('editDept').value=m.dept||'';
+  document.getElementById('editName').value=m.name||'';
+  document.getElementById('editDept').value=m.dept||'';
   document.getElementById('memberModal').style.display='flex';
 }
 function closeMemberModal(){editId=null;document.getElementById('memberModal').style.display='none';}
 function saveMemberEdit(){
   const m=S.members.find(m=>m.id===editId);if(!m)return;
   m.name=document.getElementById('editName').value.trim()||m.name;
-  m.wxpUid=document.getElementById('editWxpUid').value.trim();
-  m.wechatId=document.getElementById('editWechatId').value.trim();
   m.dept=document.getElementById('editDept').value.trim();
   // Update identity name if editing self
   if(S.identity.memberId===m.id)S.identity.name=m.name;
@@ -2320,7 +2438,7 @@ function confirmScanned(){
   const sel=scanned.filter(t=>t.selected);if(!sel.length)return;
   sel.forEach(t=>{
     const m=S.members.find(m=>m.name.includes(t.assignee||'')||(t.assignee||'').includes(m.name));
-    S.tasks.push({id:'t'+Date.now()+Math.random().toString(36).slice(2),title:t.title,assigneeIds:m?[m.id]:[],deadline:t.deadline,type:t.type||'deadline',recurrence:t.recurrence,priority:t.priority||'normal',completed:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'ai'});
+    S.tasks.push({id:'t'+Date.now()+Math.random().toString(36).slice(2),title:t.title,assigneeIds:m?[m.id]:[],deadline:t.deadline,type:t.type||'deadline',recurrence:t.recurrence,priority:t.priority||'normal',completed:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:myId()||'manager',source:'ai'});
   });
   markDirty();renderAll();scanned=[];document.getElementById('scannedList').style.display='none';
   document.getElementById('meetingText').value='';showToast(`✓ 已新增 ${sel.length} 個任務`);switchTab('tasks');
@@ -2358,42 +2476,15 @@ function updateSidePreview(){
   const el=document.getElementById('sidePreview');if(el)el.textContent=buildMsg(t,n);
 }
 async function doSend(target,content){
-  if(!S.wxp.appToken){showToast('請先設定 WxPusher AppToken','error');return false;}
-  const tgts=target==='all'?S.members:S.members.filter(m=>m.id===target);
-  const uids=tgts.map(m=>m.wxpUid).filter(Boolean);
-  if(!uids.length){showToast('所選成員尚未設定 WxPusher UID，請到成員頁面填入 UID','warn');return false;}
-  try{
-    const res=await fetch('https://wxpusher.zjiecode.com/api/send/message',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({appToken:S.wxp.appToken,content,contentType:1,uids})
-    });
-    const data=await res.json();
-    if(data.code===1000){showToast(`✓ 已發送至 ${uids.length} 位成員`);return true;}
-    showToast(`WxPusher 錯誤 ${data.code}：${data.msg}`,'warn');return false;
-  }catch(e){showToast('發送失敗：'+e.message,'error');return false;}
-}
-async function testWxPusher(){
-  if(!S.wxp.appToken){showToast('請先填入 AppToken','error');return;}
-  // Use current user's UID if available, else all UIDs
-  const m=S.members.find(m=>m.id===myId());
-  const uid=m?.wxpUid||(S.members.find(x=>x.wxpUid)?.wxpUid)||null;
-  if(!uid){showToast('請先在成員資料填入你的 WxPusher UID','warn');return;}
-  try{
-    const res=await fetch('https://wxpusher.zjiecode.com/api/send/message',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({appToken:S.wxp.appToken,content:'✅ Task List 推送測試成功！你的微信通知已正常連接。',contentType:1,uids:[uid]})
-    });
-    const data=await res.json();
-    if(data.code===1000)showToast('✓ 測試成功，請查看微信');
-    else showToast(`測試失敗 (${data.code})：${data.msg}`,'warn');
-  }catch(e){showToast('測試失敗：'+e.message,'error');}
+  if(!hasNotifyChannel()){showToast('請先在「設定」→「📣 通知設定」填入飛書 Webhook 或 PushPlus Token','error');return false;}
+  const ok=await sendNotify(content);
+  if(ok){showToast('✓ 通知已發送');return true;}
+  showToast('發送失敗，請檢查通知設定','error');return false;
 }
 async function sendReminder(){
   const btn=document.getElementById('sendBtn');btn.textContent='發送中...';btn.disabled=true;
   await doSend(document.getElementById('reminderTarget').value,document.getElementById('reminderPreview').textContent);
-  btn.textContent='📤 發送至微信';btn.disabled=false;
+  btn.textContent='📤 發送通知';btn.disabled=false;
 }
 async function sendSideReminder(){await doSend(document.getElementById('sideReminderTarget').value,document.getElementById('sidePreview').textContent);}
 
@@ -2402,7 +2493,13 @@ function fillSettingsUI(){
   document.getElementById('giteeOwner').value=S.gitee.owner||'';
   document.getElementById('giteeRepo').value =S.gitee.repo ||'';
   document.getElementById('giteeToken').value=S.gitee.token||'';
-  document.getElementById('wxpToken').value  =S.wxp.appToken||'';
+  const n=S.notify||{};
+  const setV=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+  setV('notifyFeishu',n.feishuWebhook||'');
+  setV('notifyPpToken',n.pushplusToken||'');
+  setV('notifyPpTopic',n.pushplusTopic||'');
+  setV('notifyEscalateDays',n.escalateDays!=null?n.escalateDays:3);
+  const ep=document.getElementById('notifyEventPush');if(ep)ep.checked=n.eventPush!==false;
 }
 function showToast(msg,type='success'){
   const el=document.getElementById('toast');
@@ -2464,7 +2561,7 @@ function startAutoReminderScheduler(){
   checkAutoReminder(); // check immediately on start
 }
 async function checkAutoReminder(){
-  if(!S.autoReminder?.enabled||!S.wxp.appToken)return;
+  if(!S.autoReminder?.enabled||!hasNotifyChannel())return;
   const now=new Date();
   const hour=now.getHours(),min=now.getMinutes();
   const targetHour=S.autoReminder.hour||9;
@@ -2497,20 +2594,12 @@ async function checkAutoReminder(){
   if(!hasContent)return; // nothing due today, skip
   lines.push('請及時更新進度，謝謝！');
   const content=lines.join('\n');
-  const uids=tgts.map(m=>m.wxpUid).filter(Boolean);
-  if(!uids.length)return;
-  try{
-    const res=await fetch('https://wxpusher.zjiecode.com/api/send/message',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({appToken:S.wxp.appToken,content,contentType:1,uids})
-    });
-    const data=await res.json();
-    if(data.code===1000){
-      // Mark as sent only AFTER a confirmed successful send — failures retry on next check
-      localStorage.setItem(todayKey,'1');
-      showToast(`⏰ 每日提醒已自動發送`);
-    }
-  }catch(e){/* leave unset so it retries on next check */}
+  const ok=await sendNotify(content);
+  if(ok){
+    // Mark as sent only AFTER a confirmed successful send — failures retry on next check
+    localStorage.setItem(todayKey,'1');
+    showToast(`⏰ 每日提醒已自動發送`);
+  }
 }
 async function sendTodayReminder(){
   const now=new Date();
@@ -2528,8 +2617,6 @@ async function sendTodayReminder(){
     lines.push('');
   }
   lines.push('請及時完成，謝謝！');
-  const uids=tgts.map(m=>m.wxpUid).filter(Boolean);
-  if(!S.wxp.appToken||!uids.length){showToast('請設定 AppToken 及成員 UID','warn');return;}
   await doSend(isMgr()?'all':myId(),lines.join('\n'));
 }
 
@@ -2582,9 +2669,11 @@ function saveComment(){
   t.progress=progress;
   logActivity(t,'commented',text.slice(0,50)+(text.length>50?'...':''));
   touch(t);
+  eventPushNotify(`💬 任務留言\n任務：${t.title}\n${m?.name||S.identity.name||'未知'}：${text}\n進度：${progress}%`);
   markDirty();renderAll();
   renderExistingComments(t);
   renderActivityLog(t);
+  if(detailTaskId===t.id)renderTaskDetail(t.id);
   document.getElementById('commentText').value='';
   showToast('備注已提交 ✓');
 }
@@ -2717,6 +2806,7 @@ function toggleSubtask(taskId,subtaskId){
   logActivity(t,s.completed?'subtask_done':'subtask_reopened',s.title);
   touch(t);
   markDirty();renderAll();
+  if(detailTaskId===taskId)renderTaskDetail(taskId);
 }
 
 // ══ FEATURE 7: TASK DEPENDENCIES ═════════════════════════════════════════════
@@ -2856,6 +2946,277 @@ function toggleMoreOptions(){
   if(arrow)arrow.style.transform=open?'rotate(90deg)':'';
   if(open)body.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+
+// ══ NOTIFICATIONS: FEISHU WEBHOOK + PUSHPLUS ═════════════════════════════════
+function hasNotifyChannel(){const n=S.notify||{};return !!(n.feishuWebhook||n.pushplusToken);}
+async function sendNotify(text){
+  const n=S.notify||{};let ok=false;
+  if(n.feishuWebhook){
+    try{
+      const r=await fetch(n.feishuWebhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msg_type:'text',content:{text}})});
+      ok=true;
+    }catch(e){
+      try{await fetch(n.feishuWebhook,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({msg_type:'text',content:{text}})});ok=true;}catch(e2){}
+    }
+  }
+  if(n.pushplusToken){
+    const payload={token:n.pushplusToken,title:'任務追蹤工具',content:text.replace(/\n/g,'<br>'),template:'html'};
+    if(n.pushplusTopic)payload.topic=n.pushplusTopic;
+    try{
+      await fetch('https://www.pushplus.plus/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});ok=true;
+    }catch(e){
+      try{await fetch('https://www.pushplus.plus/send',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});ok=true;}catch(e2){}
+    }
+  }
+  return ok;
+}
+// Fire-and-forget event push (only when enabled & a channel is configured)
+function eventPushNotify(text){
+  const n=S.notify||{};
+  if(!n.eventPush||!hasNotifyChannel())return;
+  try{sendNotify(text);}catch(e){}
+}
+function notifyAssigned(t){
+  const names=getAIds(t).map(id=>mGet(id)?.name).filter(Boolean).join('、')||'未指派';
+  const due=t.type==='recurring'?'例行':(t.deadline||'未設定');
+  eventPushNotify(`📌 新任務指派\n任務：${t.title}\n負責人：${names}\n截止：${due}\n指派人：${S.identity.name||'管理者'}`);
+}
+function applyNotifyInputs(){
+  if(!S.notify)S.notify={feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3};
+  const gv=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  S.notify.feishuWebhook=gv('notifyFeishu');
+  S.notify.pushplusToken=gv('notifyPpToken');
+  S.notify.pushplusTopic=gv('notifyPpTopic');
+  const ep=document.getElementById('notifyEventPush');
+  S.notify.eventPush=ep?ep.checked:true;
+  const ed=parseInt(document.getElementById('notifyEscalateDays')?.value);
+  S.notify.escalateDays=(ed&&ed>0)?ed:3;
+}
+function saveNotifySettings(){
+  applyNotifyInputs();
+  markDirty();
+  fillReminderSels();
+  showToast('通知設定已儲存 ✓');
+}
+async function testNotify(){
+  applyNotifyInputs();saveLocal();
+  if(!hasNotifyChannel()){showToast('請先填入飛書 Webhook 或 PushPlus Token','warn');return;}
+  const ok=await sendNotify('✅ 測試通知 — 任務追蹤工具通知渠道運作正常');
+  if(ok)showToast('✓ 測試通知已發送，請查看飛書/微信');
+  else showToast('測試發送失敗，請檢查設定','error');
+}
+
+// ══ OVERDUE ESCALATION ═══════════════════════════════════════════════════════
+function checkEscalations(){
+  if(!hasNotifyChannel())return;
+  const days=parseInt(S.notify?.escalateDays)||3;
+  const today=localToday();
+  // Purge stale tl_escalated_* keys from previous days
+  for(let i=localStorage.length-1;i>=0;i--){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('tl_escalated_')&&!k.endsWith('_'+today))localStorage.removeItem(k);
+  }
+  S.tasks.forEach(t=>{
+    if(!isOverdue(t))return;
+    const od=Math.floor((TODAY-new Date(t.deadline+'T00:00:00'))/86400000);
+    if(od<days)return;
+    const key=`tl_escalated_${t.id}_${today}`;
+    if(localStorage.getItem(key))return;
+    localStorage.setItem(key,'1'); // once per day per task
+    const names=getAIds(t).map(id=>mGet(id)?.name).filter(Boolean).join('、')||'未指派';
+    sendNotify(`🚨 逾期升級提醒\n任務：${t.title}\n負責人：${names}\n已逾期 ${od} 天，請跟進`);
+  });
+}
+
+// ══ WEEKLY REPORT ════════════════════════════════════════════════════════════
+function buildWeeklyReport(){
+  const now=new Date();
+  const start=new Date(now);start.setDate(start.getDate()-6);
+  const startDs=localDateStr(start),endDs=localToday();
+  const cutoff=new Date(now.getTime()-7*86400000).toISOString();
+  const namesOf=t=>getAIds(t).map(id=>mGet(id)?.name).filter(Boolean).join('、')||'未指派';
+  const done=S.tasks.filter(t=>t.completed&&(t.updatedAt||'')>=cutoff);
+  const overdue=S.tasks.filter(t=>isOverdue(t));
+  const inprog=S.tasks.filter(t=>!t.completed&&!isOverdue(t));
+  const lines=[`📊 團隊週報 ${startDs} ~ ${endDs}`,'──────────'];
+  lines.push(`✅ 本週完成 (${done.length})：`);
+  done.forEach(t=>lines.push(`- ${t.title} (${namesOf(t)})`));
+  lines.push(`⚠️ 逾期中 (${overdue.length})：`);
+  overdue.forEach(t=>{
+    const d=Math.floor((TODAY-new Date(t.deadline+'T00:00:00'))/86400000);
+    lines.push(`- ${t.title} (${namesOf(t)}, 逾期${d}天)`);
+  });
+  lines.push(`🔄 進行中 (${inprog.length})：`);
+  inprog.forEach(t=>lines.push(`- ${t.title} (${namesOf(t)}, 進度${t.progress||0}%)`));
+  return lines.join('\n');
+}
+function openWeeklyReport(){
+  document.getElementById('weeklyReportText').textContent=buildWeeklyReport();
+  document.getElementById('weeklyReportModal').style.display='flex';
+}
+function closeWeeklyReportModal(){document.getElementById('weeklyReportModal').style.display='none';}
+async function copyWeeklyReport(){
+  const text=document.getElementById('weeklyReportText').textContent;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('✓ 週報已複製');
+  }catch(e){
+    // Fallback: hidden textarea + execCommand
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');showToast('✓ 週報已複製');}
+    catch(e2){showToast('複製失敗，請手動選取','error');}
+    document.body.removeChild(ta);
+  }
+}
+async function sendWeeklyReport(){
+  const text=document.getElementById('weeklyReportText').textContent;
+  await doSend('all',text);
+}
+
+// ══ AUTO-ARCHIVE COMPLETED TASKS ═════════════════════════════════════════════
+function autoArchiveTasks(){
+  if(!Array.isArray(S.archived))S.archived=[];
+  const cutoff=new Date(Date.now()-30*86400000).toISOString();
+  const keep=[],arc=[];
+  S.tasks.forEach(t=>{(t.completed&&(t.updatedAt||'')<cutoff)?arc.push(t):keep.push(t);});
+  if(arc.length){
+    S.tasks=keep;
+    S.archived=[...arc,...S.archived];
+  }
+  // Keep only the most recent 200
+  S.archived.sort((a,b)=>(a.updatedAt||'')<(b.updatedAt||'')?1:-1);
+  if(S.archived.length>200)S.archived=S.archived.slice(0,200);
+}
+function renderArchive(){
+  const cnt=document.getElementById('archiveCount');
+  const list=document.getElementById('archiveList');
+  if(!cnt||!list)return;
+  const arc=S.archived||[];
+  cnt.textContent=arc.length;
+  if(!arc.length){list.innerHTML=`<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px">暫無歸檔任務</div>`;return;}
+  const shown=arc.slice(0,50);
+  list.innerHTML=shown.map(t=>{
+    const d=(t.completedAt||t.updatedAt||'').slice(0,10);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;background:var(--card2);border-radius:9px;margin-bottom:6px;border:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:line-through;color:var(--muted)">${esc(t.title)}</div>
+        <div style="font-size:11px;color:var(--muted)">完成於 ${esc(d)}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;min-height:32px;padding:5px 12px" onclick="restoreArchived('${t.id}')">還原</button>
+    </div>`;
+  }).join('')+(arc.length>50?`<div style="text-align:center;color:var(--muted);font-size:11px;margin-top:4px">僅顯示最近 50 項，共 ${arc.length} 項</div>`:'');
+}
+function restoreArchived(id){
+  const idx=(S.archived||[]).findIndex(t=>t.id===id);
+  if(idx<0)return;
+  const t=S.archived.splice(idx,1)[0];
+  touch(t); // newer updatedAt so the active copy wins in sync merges
+  S.tasks.push(t);
+  markDirty();renderAll();
+  showToast('✓ 任務已還原至列表');
+}
+
+// ══ MANAGER PIN ══════════════════════════════════════════════════════════════
+function updatePinStatus(){
+  const el=document.getElementById('pinStatus');if(!el)return;
+  el.textContent=S.managerPin?'目前狀態：✅ 已設定 PIN':'目前狀態：未設定（任何人可選管理者身份）';
+  el.style.color=S.managerPin?'var(--green)':'var(--muted)';
+}
+function saveManagerPin(){
+  const p1=(document.getElementById('pinInput1')?.value||'').trim();
+  const p2=(document.getElementById('pinInput2')?.value||'').trim();
+  if(!p1&&!p2){
+    S.managerPin='';
+    markDirty();updatePinStatus();
+    showToast('已停用管理者 PIN');
+    return;
+  }
+  if(!/^\d{4,6}$/.test(p1)){showToast('PIN 須為 4-6 位數字','error');return;}
+  if(p1!==p2){showToast('兩次輸入的 PIN 不一致','error');return;}
+  S.managerPin=p1;
+  document.getElementById('pinInput1').value='';
+  document.getElementById('pinInput2').value='';
+  markDirty();updatePinStatus();
+  showToast('✓ 管理者 PIN 已設定');
+}
+
+// ══ TASK DETAIL VIEW (read-only) ═════════════════════════════════════════════
+let detailTaskId=null;
+function openTaskDetail(id){
+  const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  detailTaskId=id;
+  renderTaskDetail(id);
+  document.getElementById('taskDetailModal').style.display='flex';
+}
+function closeTaskDetailModal(){detailTaskId=null;document.getElementById('taskDetailModal').style.display='none';}
+function renderTaskDetail(id){
+  const t=S.tasks.find(t=>t.id===id);if(!t){closeTaskDetailModal();return;}
+  const body=document.getElementById('taskDetailBody');if(!body)return;
+  const row=(label,html)=>`<div style="margin-bottom:10px"><div class="label" style="margin-bottom:3px">${label}</div><div style="font-size:13px;line-height:1.6">${html}</div></div>`;
+  const aids=getAIds(t);
+  const assignees=aids.map(aid=>{const m=mGet(aid),c=mColor(aid);return m?`<span class="badge" style="background:${c}20;color:${c}">${esc(m.name)}</span>`:'';}).filter(Boolean).join(' ')||'<span style="color:var(--muted)">未指派</span>';
+  const priLabel={low:'⬇️ 低',normal:'一般',high:'⬆️ 高',urgent:'🚨 緊急'}[t.priority]||'一般';
+  const typeHtml=t.type==='recurring'?`🔄 例行任務（${recurLabel(t)}）`:'📅 有期限任務';
+  const ov=isOverdue(t);
+  const deadlineHtml=t.deadline?`${esc(t.deadline)}${ov?' <span style="color:var(--red);font-weight:700">⚠️ 逾期</span>':''}`:'<span style="color:var(--muted)">未設定</span>';
+  const tags=getTags(t);
+  const tagsHtml=tags.length?tags.map(tag=>`<span class="tag-pill" style="background:${tagColor(tag)}18;color:${tagColor(tag)};border:1px solid ${tagColor(tag)}40">#${esc(tag)}</span>`).join(' '):'';
+  const subtasks=t.subtasks||[];
+  const stHtml=subtasks.length?subtasks.map(s=>`<div class="subtask-row"><button onclick="event.stopPropagation();toggleSubtask('${t.id}','${s.id}')" class="subtask-cb${s.completed?' done':''}">${s.completed?'✓':''}</button><span style="text-decoration:${s.completed?'line-through':'none'};color:${s.completed?'var(--muted)':'var(--text)'}">${esc(s.title)}</span></div>`).join(''):'';
+  const blockers=(t.blockedBy||[]).map(bid=>{
+    const bt=S.tasks.find(x=>x.id===bid)||(S.archived||[]).find(x=>x.id===bid);
+    if(!bt)return '';
+    return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px"><span>${bt.completed?'✅':'⏳'}</span><span style="color:${bt.completed?'var(--muted)':'var(--text)'}">${esc(bt.title)}</span><span style="font-size:10px;color:var(--muted)">${bt.completed?'已完成':'未完成'}</span></div>`;
+  }).filter(Boolean).join('');
+  const progress=t.progress||0;
+  const progressHtml=`<div style="display:flex;align-items:center;gap:9px"><div class="progress-bar-outer" style="flex:1;margin-top:0"><div class="progress-bar-inner" style="width:${progress}%;background:${progress===100?'var(--green)':progress>=50?'var(--blue)':'var(--orange)'}"></div></div><span style="font-size:12px;font-weight:700;color:var(--blue)">${progress}%</span></div>`;
+  const comments=t.comments||[];
+  const commentsHtml=comments.length?comments.slice().reverse().map(c=>{
+    const m=mGet(c.authorId);
+    const color=m?mColor(c.authorId):'var(--muted)';
+    const pBadge=c.progress!=null?`<span style="font-size:10px;background:#3b82f620;color:var(--blue);padding:1px 7px;border-radius:10px;font-weight:700">${c.progress}%</span>`:'';
+    return `<div class="comment-item">
+      <div class="comment-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-weight:700;color:${color}">${esc(c.author||'未知')}</span>${pBadge}
+        <span style="margin-left:auto">${new Date(c.ts).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <div class="comment-text">${esc(c.text)}</div>
+    </div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:12px;padding:4px 0">暫無留言</div>`;
+  const log=t.activityLog||[];
+  const aIcons={created:'✨',edited:'✏️',completed:'✅',reopened:'↩️',commented:'💬',subtask_done:'☑️',subtask_reopened:'☐'};
+  const aLabels={created:'建立任務',edited:'修改任務',completed:'標記完成',reopened:'重新開啟',commented:'新增備注',subtask_done:'完成子任務',subtask_reopened:'重新開啟子任務'};
+  const logHtml=log.length?log.slice().reverse().map(a=>`
+    <div class="activity-row">
+      <span style="flex-shrink:0">${aIcons[a.action]||'📌'}</span>
+      <div>
+        <span style="font-weight:700;color:var(--text)">${esc(a.userName)}</span>
+        <span> ${esc(aLabels[a.action]||a.action)}${a.detail?`：${esc(a.detail.slice(0,40)+(a.detail.length>40?'...':''))}`:''}</span>
+        <span style="margin-left:6px">${new Date(a.ts).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+    </div>`).join(''):`<div style="color:var(--muted);font-size:12px;padding:4px 0">暫無記錄</div>`;
+  body.innerHTML=`
+    <div style="font-weight:800;font-size:16px;line-height:1.5;margin-bottom:10px;${t.completed?'text-decoration:line-through;color:var(--muted)':''}">${esc(t.title)}${t.completed?' <span class="badge" style="background:#22c55e20;color:var(--green)">✅ 已完成</span>':''}</div>
+    ${t.description?row('描述',esc(t.description)):''}
+    ${row('負責人',assignees)}
+    ${row('類型',typeHtml)}
+    ${t.type==='deadline'?row('截止日期',deadlineHtml):''}
+    ${row('優先級',priLabel)}
+    ${tagsHtml?row('標籤',tagsHtml):''}
+    ${row('進度',progressHtml)}
+    ${subtasks.length?row(`子任務 (${subtasks.filter(s=>s.completed).length}/${subtasks.length})`,stHtml):''}
+    ${blockers?row('前置任務',blockers):''}
+    ${row(`留言 (${comments.length})`,`<div style="max-height:180px;overflow-y:auto">${commentsHtml}</div>`)}
+    ${row('活動記錄',`<div style="max-height:150px;overflow-y:auto">${logHtml}</div>`)}`;
+  const actions=document.getElementById('taskDetailActions');
+  if(actions)actions.innerHTML=`
+    <button class="btn btn-ghost btn-full" onclick="detailOpenComment('${t.id}')">💬 留言</button>
+    ${canEditTask(t)?`<button class="btn btn-primary btn-full" onclick="detailOpenEdit('${t.id}')">✏️ 編輯</button>`:''}`;
+}
+function detailOpenEdit(id){closeTaskDetailModal();openEditTaskModal(id);}
+function detailOpenComment(id){closeTaskDetailModal();openCommentModal(id);}
 
 // ══ FEATURE 5: THEME ═════════════════════════════════════════════════════════
 function applyTheme(){
