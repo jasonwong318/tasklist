@@ -51,10 +51,18 @@ body.light ::-webkit-scrollbar-thumb{background:#D8D5CC}
 @media(min-width:768px){#fab{bottom:24px;right:28px}}
 
 /* ── Header collapse on scroll ── */
-#appHeader{transition:padding .3s}
+#appHeader{transition:padding .25s}
+/* GPU-accelerated collapse: opacity + grid-template-rows (no layout reflow) */
+#teamOverviewSection,#personalOverviewSection{
+  display:grid;grid-template-rows:1fr;
+  transition:grid-template-rows .25s ease,opacity .2s ease,margin-bottom .25s ease;
+  will-change:opacity,grid-template-rows;
+}
+#teamOverviewSection>*,#personalOverviewSection>*{overflow:hidden}
 #appHeader.header-compact #teamOverviewSection,
-#appHeader.header-compact #personalOverviewSection{max-height:0;overflow:hidden;opacity:0;margin:0;transition:all .3s}
-#teamOverviewSection,#personalOverviewSection{transition:max-height .3s,opacity .3s,margin .3s;max-height:300px;opacity:1}
+#appHeader.header-compact #personalOverviewSection{
+  grid-template-rows:0fr;opacity:0;margin-bottom:0;pointer-events:none;
+}
 
 /* ── Task complete animation ── */
 @keyframes taskComplete{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
@@ -997,7 +1005,13 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Header collapse on scroll
   const ms=document.getElementById('mainScroll');
   const hdr=document.getElementById('appHeader');
-  function onScroll(e){const top=e?.target?.scrollTop||window.scrollY||0;if(top>60)hdr.classList.add('header-compact');else hdr.classList.remove('header-compact');}
+  let _hdrCollapsed=false;
+  function onScroll(e){
+    const top=e?.target?.scrollTop||window.scrollY||0;
+    // Hysteresis: collapse at >80px, expand at <40px — prevents flicker at boundary
+    if(!_hdrCollapsed&&top>80){_hdrCollapsed=true;hdr.classList.add('header-compact');}
+    else if(_hdrCollapsed&&top<40){_hdrCollapsed=false;hdr.classList.remove('header-compact');}
+  }
   if(ms)ms.addEventListener('scroll',onScroll,{passive:true});
   window.addEventListener('scroll',onScroll,{passive:true});
   // Keyboard shortcuts
