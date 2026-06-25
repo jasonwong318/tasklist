@@ -1321,7 +1321,8 @@ function mergeRemoteData(d){
   S.deletedIds=mergeDeletedIds(localDel,remoteDel);
   // Tombstones win over both lists after merge
   S.tasks=S.tasks.filter(t=>{const delTs=S.deletedIds[t.id];return !delTs||(t.updatedAt&&t.updatedAt>delTs);});
-  if(d.members)S.members=d.members;
+  // Never let an empty remote members array wipe a non-empty local list (arrays are always truthy)
+  if(Array.isArray(d.members)&&d.members.length)S.members=d.members;
   if(d.notify)S.notify=Object.assign({feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},S.notify||{},d.notify);
   if(typeof d.managerPin==='string')S.managerPin=d.managerPin;
   S.archived=mergeArchived(S.archived,d.archived);
@@ -1350,7 +1351,7 @@ function conflictLoadRemote(){
   // Discard local changes, accept remote data
   if(!conflictRemoteData)return;
   if(conflictRemoteData.tasks) S.tasks=conflictRemoteData.tasks;
-  if(conflictRemoteData.members) S.members=conflictRemoteData.members;
+  if(Array.isArray(conflictRemoteData.members)&&conflictRemoteData.members.length) S.members=conflictRemoteData.members;
   if(conflictRemoteData.notify) S.notify=Object.assign({feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},conflictRemoteData.notify);
   if(Array.isArray(conflictRemoteData.archived)) S.archived=conflictRemoteData.archived;
   if(typeof conflictRemoteData.managerPin==='string') S.managerPin=conflictRemoteData.managerPin;
@@ -2099,6 +2100,12 @@ function toggleAddTask(){
 }
 function buildAssigneeCheckboxes(containerId,selectedIds){
   const wrap=document.getElementById(containerId);if(!wrap)return;
+  if(!S.members.length){
+    wrap.style.display='block';
+    wrap.innerHTML=`<div style="grid-column:1/-1;font-size:12px;color:var(--muted);text-align:center;padding:6px 0">尚無成員，請先到「成員」頁籤新增團隊成員</div>`;
+    return;
+  }
+  wrap.style.display='grid';
   wrap.innerHTML=S.members.map((m,i)=>{
     const c=MC[i%MC.length],checked=selectedIds&&selectedIds.includes(m.id);
     return `<label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;border-radius:9px;border:1px solid ${checked?c:'var(--border)'};cursor:pointer;transition:all .15s;background:${checked?c+'20':'transparent'};text-align:center" id="albl_${containerId}_${m.id}" data-active="${checked?'1':'0'}" onclick="toggleAssignee('${containerId}','${m.id}','${c}')">
@@ -2140,6 +2147,7 @@ function addTask(){
   const aids=getSelectedFromContainer('fAssigneeList');
   const type=document.getElementById('fType').value;
   if(!title){showToast('請填寫任務標題','error');return;}
+  if(!S.members.length){showToast('尚無成員，請先到「成員」頁籤新增團隊成員','error');return;}
   if(!aids.length){showToast('請選擇至少一位負責人','error');return;}
   const recur=document.getElementById('fRecur').value;
   let recurDay=null;
