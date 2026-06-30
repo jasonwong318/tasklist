@@ -890,6 +890,15 @@ button:active{transform:scale(0.96)}
           <div style="font-size:11px;color:var(--muted);line-height:1.7">💡 在任務編輯頁面點「📑 另存模板」即可新增模板</div>
         </div>
 
+        <div class="card" id="backupCard" style="margin-bottom:13px">
+          <div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:9px"><span style="font-size:20px">💾</span> 資料備份</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">匯出包含所有任務、成員、模板及設定的 JSON 備份檔，或從備份檔還原本機資料</div>
+          <button class="btn btn-primary btn-full btn-sm" style="margin-bottom:8px" onclick="exportBackup()">⬇️ 匯出 JSON 備份</button>
+          <button class="btn btn-ghost btn-full btn-sm" onclick="document.getElementById('importBackupFile').click()">⬆️ 匯入 JSON 備份</button>
+          <input type="file" id="importBackupFile" accept="application/json" style="display:none" onchange="importBackup(this)">
+          <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-top:10px">⚠️ 備份檔包含通知 Webhook／Token 及管理者 PIN，請妥善保管，不要分享給無關人士。匯入會覆蓋本機及 Gitee 遠端資料</div>
+        </div>
+
         <div class="card" id="aboutCard">
           <div style="font-weight:700;margin-bottom:9px">ℹ️ 關於</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.9">
@@ -1843,7 +1852,7 @@ function updateRoleUI(){
   document.getElementById('addMemberSection').style.display=mgr?'':'none';
   ['dReminderTab','nav-reminders'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';});
   // Manager-only settings sections
-  ['giteeHowToBanner','giteeSetupBanner','aboutCard','autoReminderCard','templateCard','weeklyReportCard','archiveCard','pinCard'].forEach(id=>{
+  ['giteeHowToBanner','giteeSetupBanner','aboutCard','autoReminderCard','templateCard','weeklyReportCard','archiveCard','pinCard','backupCard'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.style.display=mgr?'':'none';
   });
   const wrb=document.getElementById('weeklyReportBtn');
@@ -3160,6 +3169,55 @@ function saveManagerPin(){
   document.getElementById('pinInput2').value='';
   markDirty();updatePinStatus();
   showToast('✓ 管理者 PIN 已設定');
+}
+
+// ══ BACKUP / RESTORE ═════════════════════════════════════════════════════════
+function exportBackup(){
+  const data={
+    backupVersion:1,exportedAt:new Date().toISOString(),
+    tasks:S.tasks,members:S.members,deletedIds:S.deletedIds||{},
+    notify:S.notify,archived:S.archived||[],managerPin:S.managerPin||'',
+    templates:S.templates||[],autoReminder:S.autoReminder,theme:S.theme,
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`tasklist-backup-${localToday()}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✓ 已匯出備份檔案');
+}
+function importBackup(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let data;
+    try{data=JSON.parse(e.target.result);}catch(err){showToast('匯入失敗：檔案格式錯誤','error');input.value='';return;}
+    if(!data||!Array.isArray(data.tasks)||!Array.isArray(data.members)){
+      showToast('匯入失敗：不是有效的備份檔','error');input.value='';return;
+    }
+    const when=data.exportedAt?new Date(data.exportedAt).toLocaleString('zh-TW'):'未知';
+    const ok=confirm(`確定要匯入備份嗎？\n\n備份時間：${when}\n任務數：${data.tasks.length}　成員數：${data.members.length}\n\n這會覆蓋目前本機資料及 Gitee 遠端資料。`);
+    if(!ok){input.value='';return;}
+    S.tasks=data.tasks;
+    S.members=data.members;
+    S.deletedIds=data.deletedIds&&typeof data.deletedIds==='object'?data.deletedIds:{};
+    S.notify=Object.assign({feishuWebhook:'',pushplusToken:'',pushplusTopic:'',eventPush:true,escalateDays:3},data.notify||{});
+    S.archived=Array.isArray(data.archived)?data.archived:[];
+    S.managerPin=typeof data.managerPin==='string'?data.managerPin:'';
+    S.templates=Array.isArray(data.templates)?data.templates:[];
+    if(data.autoReminder)S.autoReminder=data.autoReminder;
+    if(data.theme)S.theme=data.theme;
+    migrateTaskFields();
+    saveLocal();
+    applyTheme();
+    renderAll();
+    markDirty();
+    showToast('✓ 已匯入備份並同步');
+    input.value='';
+  };
+  reader.readAsText(file);
 }
 
 // ══ TASK DETAIL VIEW (read-only) ═════════════════════════════════════════════
